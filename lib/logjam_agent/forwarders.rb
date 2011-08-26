@@ -11,5 +11,9 @@ module LogjamAgent
     def get(app, env)
       @@forwarders["#{app}-#{env}"]
     end
+
+    def reset
+      @@forwarders.each_value {|f| f.reset}
+    end
   end
 end

@@ -22,9 +22,11 @@ module LogjamAgent
       }
     end
 
+    # TODO: mutex!
     def send(msg)
       return if paused?
       begin
+        # $stderr.puts msg
         exchange.publish(msg, :key => @config[:routing_key], :persistent => false)
       rescue Exception => exception
         reraise_expectation_errors!
@@ -62,7 +64,7 @@ module LogjamAgent
     def pause(exception)
       @paused = Time.now
       reset(exception)
-      raise ForwarderError.new("Could not log to AMQP exchange (#{exception.message})")
+      raise ForwardingError.new("Could not log to AMQP exchange (#{exception.message})")
     end
 
     def paused?

@@ -1,18 +1,21 @@
 require 'active_support/buffered_logger'
+require 'active_support/core_ext/logger'
+require 'fileutils'
 
 module LogjamAgent
-  # Inspired by the buffered logger idea by Ezra
   class BufferedLogger < ActiveSupport::BufferedLogger
 
     attr_accessor :formatter
 
     def initialize(*args)
-      super
-      self.formatter = lambda{|timestamp, severity, message, progname| messsage}
+      super(*args)
+      # stupid bug in the buffered logger code
+      @log.write "\n"
+      @formatter = lambda{|_, _, _, message| message}
     end
 
     def start_request(app, env)
-      Thread.current[:logjam_request] = Request.new(app, env)
+      Thread.current[:logjam_request] = Request.new(app, env, self)
     end
 
     def finish_request
@@ -28,32 +31,17 @@ module LogjamAgent
 
     def add(severity, message = nil, progname = nil, &block)
       return if @level > severity
-      message = (message || (block && block.call) || progname).to_s
+      message = (message || (block && block.call) || '').to_s
       # If a newline is necessary then create a new message ending with a newline.
       # Ensures that the original message is not mutated.
       message = "#{message}\n" unless message[-1] == ?\n
       time = Time.now
-      buffer << formatter.call(severity, message, progname, time)
+      buffer << formatter.call(severity, time, progname, message)
       auto_flush
       if request = self.request
-        request.add_line(severity, time, message)
+        request.add_line(severity, time, message[0..-2])
       end
       message
-    end
-
-    def flush
-      @guard.synchronize do
-        buffer.each do |content|
-          @log.write(content)
-        end
-
-        # Important to do this even if buffer was empty or else @buffer will
-        # accumulate empty arrays for each request where nothing was logged.
-        clear_buffer
-
-        # send request to logjam
-        finish_request
-      end
     end
 
   end
