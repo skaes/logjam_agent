@@ -47,5 +47,9 @@ module LogjamAgent
       message
     end
 
+    def logdev=(log_device)
+      raise "cannot connect logger to new log device" unless log_device.respond_to?(:write)
+      @log = log_device
+    end
   end
 end
