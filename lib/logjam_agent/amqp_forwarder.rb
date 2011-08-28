@@ -23,11 +23,13 @@ module LogjamAgent
     end
 
     # TODO: mutex!
-    def send(msg)
+    def send(msg, engine)
       return if paused?
       begin
         # $stderr.puts msg
-        exchange.publish(msg, :key => @config[:routing_key], :persistent => false)
+        key = @config[:routing_key]
+        key += ".#{engine}" if engine
+        exchange.publish(msg, :key => key, :persistent => false)
       rescue Exception => exception
         reraise_expectation_errors!
         pause(exception)
