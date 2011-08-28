@@ -14,12 +14,14 @@ module LogjamAgent
       @formatter = lambda{|_, _, _, message| message}
     end
 
-    def start_request(app, env)
-      Thread.current[:logjam_request] = Request.new(app, env, self)
+    def start_request(app, env, initial_fields={})
+      Thread.current[:logjam_request] = Request.new(app, env, self, initial_fields)
     end
 
-    def finish_request
+    def finish_request(additional_fields={})
+      # puts "finishing request"
       if request = self.request
+        request.fields.merge!(additional_fields)
         Thread.current[:logjam_request] = nil
         request.forward
       end
@@ -39,6 +41,7 @@ module LogjamAgent
       buffer << formatter.call(severity, time, progname, message)
       auto_flush
       if request = self.request
+        # puts "adding line to request"
         request.add_line(severity, time, message[0..-2])
       end
       message
