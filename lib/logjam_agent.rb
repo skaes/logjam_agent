@@ -10,7 +10,9 @@ module LogjamAgent
   class ForwardingError < StandardError; end
 
   mattr_accessor :error_handler
-
   self.error_handler = lambda { |exception| }
+
+  mattr_accessor :application_name
+  self.application_name = "rails"
 
 end
