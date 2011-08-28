@@ -7,15 +7,11 @@ module LogjamAgent
 
     @@hostname = Socket.gethostname.split('.').first
 
-    def initialize(app, env, logger)
+    def initialize(app, env, logger, initial_fields)
       @logger = logger
       @forwarder = Forwarders.get(app, env)
       @lines = []
-      @fields = {
-        :host => @@hostname,
-        :pid => Process.pid,
-        :lines => @lines
-      }
+      @fields = initial_fields.merge(:host => @@hostname, :process_id => Process.pid, :lines => @lines)
     end
 
     def add_line(severity, timestamp, message)
@@ -37,10 +33,10 @@ module LogjamAgent
 
     def handle_forwarding_error(exception)
       @logger.error exception.to_s
-      begin
-        LogjamAgent.error_handler.call(exception)
-      rescue Exception
-      end
+      LogjamAgent.error_handler.call(exception)
+    rescue Exception
+      # swallow all exceptions
     end
+
   end
 end
