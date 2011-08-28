@@ -25,7 +25,7 @@ module LogjamAgent
     end
 
     def call(severity, timestamp, progname, msg)
-      "#{format_severity(severity)} #{format_time(timestamp)} #{progname||@app_name}[#{$$}]#{render_extra_attributes}: #{format_msg(msg)}"
+      "#{format_severity(severity)} #{format_time(timestamp)} #{@hostname} #{progname||@app_name}[#{$$}]#{render_extra_attributes}: #{format_msg(msg)}"
     end
 
     def render_extra_attributes
