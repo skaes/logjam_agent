@@ -15,4 +15,6 @@ module LogjamAgent
   mattr_accessor :application_name
   self.application_name = "rails"
 
+  mattr_accessor :disabled
+  self.disabled = false
 end
