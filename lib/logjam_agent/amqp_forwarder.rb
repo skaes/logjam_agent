@@ -24,7 +24,7 @@ module LogjamAgent
 
     # TODO: mutex!
     def send(msg, engine)
-      return if paused? || Logjam.disabled
+      return if paused? || LogjamAgent.disabled
       begin
         # $stderr.puts msg
         key = @config[:routing_key]
