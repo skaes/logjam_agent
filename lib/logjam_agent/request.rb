@@ -15,7 +15,7 @@ module LogjamAgent
     end
 
     def add_line(severity, timestamp, message)
-      @lines << [severity, format_time(timestamp), message]
+      @lines << [severity, format_time(timestamp), message.strip]
     end
 
     def forward
