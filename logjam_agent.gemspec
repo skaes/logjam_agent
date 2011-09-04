@@ -21,5 +21,5 @@ Gem::Specification.new do |s|
   # specify any dependencies here; for example:
   # s.add_development_dependency "rspec"
   s.add_runtime_dependency "activesupport"
-  s.add_runtime_dependency "time_bandits", [">= 0.1.0"]
+  s.add_runtime_dependency "time_bandits", [">= 0.1.1"]
 end
