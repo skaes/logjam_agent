@@ -34,15 +34,12 @@ module LogjamAgent
     def add(severity, message = nil, progname = nil, &block)
       return if @level > severity
       message = (message || (block && block.call) || '').to_s
-      # If a newline is necessary then create a new message ending with a newline.
-      # Ensures that the original message is not mutated.
-      message = "#{message}\n" unless message[-1] == ?\n
       time = Time.now
-      buffer << formatter.call(severity, time, progname, message)
+      buffer << formatter.call(severity, time, progname, message) << "\n"
       auto_flush
       if request = self.request
         # puts "adding line to request"
-        request.add_line(severity, time, message[0..-2])
+        request.add_line(severity, time, message)
       end
       message
     end

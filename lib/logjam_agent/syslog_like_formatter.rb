@@ -20,20 +20,20 @@ module LogjamAgent
       timestamp.strftime("%b %d %H:%M:%S.#{timestamp.usec}")
     end
 
-    def format_msg(msg)
-      "#{msg}".sub(/^[\s\n]+/, '').sub(/[\s\n]+$/,"\n")
+    def format_message(msg)
+      msg.strip
     end
 
     def call(severity, timestamp, progname, msg)
-      "#{format_severity(severity)} #{format_time(timestamp)} #{@hostname} #{progname||@app_name}[#{$$}]#{render_extra_attributes}: #{format_msg(msg)}"
+      "#{format_severity(severity)} #{format_time(timestamp)} #{@hostname} #{progname||@app_name}[#{$$}]#{render_extra_attributes}: #{format_message(msg)}"
     end
 
     def render_extra_attributes
-      (self.extra_attributes||[]).map{|key, value| " #{key}[#{value}]"}
+      (@extra_attributes || []).map{|key, value| " #{key}[#{value}]"}.join
     end
 
     def add_extra_attributes(attributes)
-      (self.extra_attributes ||= []).concat(attributes)
+      (@extra_attributes ||= []).concat(attributes)
     end
   end
 end
