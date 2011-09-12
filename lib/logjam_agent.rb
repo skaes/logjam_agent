@@ -13,7 +13,10 @@ module LogjamAgent
   self.error_handler = lambda { |exception| }
 
   mattr_accessor :application_name
-  self.application_name = "rails"
+  self.application_name = nil
+
+  mattr_accessor :environment_name
+  self.environment_name = nil
 
   def self.disable!
     self.disabled = true

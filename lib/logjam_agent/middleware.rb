@@ -15,7 +15,9 @@ module LogjamAgent
     private
 
     def start_request(env)
-      Rails.logger.start_request(env["logjam_agent.application_name"]||LogjamAgent.application_name, Rails.env)
+      app_name = env["logjam_agent.application_name"] || LogjamAgent.application_name
+      env_name = env["logjam_agent.environment_name"] || LogjamAgent.environment_name
+      Rails.logger.start_request(app_name, env_name)
     end
 
     def finish_request(env)
