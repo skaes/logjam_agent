@@ -17,7 +17,7 @@ module LogjamAgent
     end
 
     def format_time(timestamp)
-      timestamp.strftime("%b %d %H:%M:%S.#{timestamp.usec}")
+      timestamp.strftime("%b %d %H:%M:%S.#{"%06d" % timestamp.usec}")
     end
 
     def format_message(msg)

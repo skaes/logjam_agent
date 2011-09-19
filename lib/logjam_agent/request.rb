@@ -29,7 +29,7 @@ module LogjamAgent
 
     def format_time(t)
       # iso time with microseconds
-      t.strftime("%Y-%m-%dT%H:%M:%S.#{t.usec}")
+      t.strftime("%Y-%m-%dT%H:%M:%S.#{"%06d" % t.usec}")
     end
 
     def handle_forwarding_error(exception)
