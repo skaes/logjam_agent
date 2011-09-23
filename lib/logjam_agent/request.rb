@@ -18,6 +18,10 @@ module LogjamAgent
       @lines << [severity, format_time(timestamp), message.strip]
     end
 
+    def add_exception(exception)
+      ((@fields[:exceptions] ||= []) << exception.class.to_s).uniq!
+    end
+
     def forward
       engine = @fields.delete(:engine)
       @forwarder.forward(@fields.to_json, engine)

@@ -27,7 +27,6 @@ module LogjamAgent
     end
 
     def finish_request(additional_fields={})
-      # puts "finishing request"
       if request = self.request
         request.fields.merge!(additional_fields)
         self.request = nil
@@ -37,20 +36,35 @@ module LogjamAgent
 
     def add(severity, message = nil, progname = nil, &block)
       return if @level > severity
-      message = (message || (block && block.call) || '').to_s
+      request = self.request
+      if message.is_a?(Exception)
+        request.add_exception(message) if request
+        message = format_exception(message)
+      else
+        message = (message || (block && block.call) || '').to_s
+      end
       time = Time.now
       buffer << formatter.call(severity, time, progname, message) << "\n"
       auto_flush
-      if request = self.request
-        # puts "adding line to request"
-        request.add_line(severity, time, message)
-      end
+      request.add_line(severity, time, message) if request
       message
     end
 
     def logdev=(log_device)
       raise "cannot connect logger to new log device" unless log_device.respond_to?(:write)
       @log = log_device
+    end
+
+    private
+
+    def format_exception(exception)
+      msg = "#{exception.class} : #{exception.message}"
+      if backtrace = exception.backtrace
+        backtrace = Rails.backtrace_cleaner.clean(backtrace, :all) if defined?(Rails)
+        msg << "\n  #{backtrace.join("\n  ")}"
+      else
+        msg
+      end
     end
   end
 end
