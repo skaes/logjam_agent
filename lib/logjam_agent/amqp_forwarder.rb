@@ -23,7 +23,7 @@ module LogjamAgent
     end
 
     # TODO: mutex!
-    def send(msg, engine)
+    def forward(msg, engine)
       return if paused? || LogjamAgent.disabled
       begin
         # $stderr.puts msg

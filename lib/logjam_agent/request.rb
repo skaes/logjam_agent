@@ -20,7 +20,7 @@ module LogjamAgent
 
     def forward
       engine = @fields.delete(:engine)
-      @forwarder.send(@fields.to_json, engine)
+      @forwarder.forward(@fields.to_json, engine)
     rescue Exception => e
       handle_forwarding_error(e)
     end
