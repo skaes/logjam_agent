@@ -38,10 +38,13 @@ module LogjamAgent
       return if @level > severity
       request = self.request
       if message.is_a?(Exception)
-        request.add_exception(message) if request
+        request.add_exception(message.class.to_s) if request
         message = format_exception(message)
       else
         message = (message || (block && block.call) || '').to_s
+        if request && severity >= Logger::ERROR && (ex = detect_logged_exception(message))
+          request.add_exception(ex)
+        end
       end
       time = Time.now
       buffer << formatter.call(severity, time, progname, message) << "\n"
@@ -55,7 +58,39 @@ module LogjamAgent
       @log = log_device
     end
 
+    @@exception_classes = []
+    def self.auto_detect_exception(exception_class)
+      @@exception_classes << exception_class.to_s
+    end
+
+    @@exception_matcher = nil
+    def self.reset_exception_matcher
+      @@exception_matcher = Regexp.new(@@exception_classes.map{|e| Regexp.escape(e)}.join("|"))
+    end
+
+    def self.auto_detect_logged_exceptions
+      determine_loaded_exception_classes
+      Exception.class_eval <<-"EOS"
+        def self.inherited(subclass)
+          logger_class = ::LogjamAgent::BufferedLogger
+          logger_class.auto_detect_exception(subclass)
+          logger_class.reset_exception_matcher
+        end
+      EOS
+    end
+
     private
+
+    def detect_logged_exception(message)
+      matcher = @@exception_matcher && message[matcher]
+    end
+
+    def self.determine_loaded_exception_classes
+      ObjectSpace.each_object(Class) do |klass|
+        auto_detect_exception(klass) if klass < Exception
+      end
+      reset_exception_matcher
+    end
 
     def format_exception(exception)
       msg = "#{exception.class} : #{exception.message}"

@@ -19,7 +19,7 @@ module LogjamAgent
     end
 
     def add_exception(exception)
-      ((@fields[:exceptions] ||= []) << exception.class.to_s).uniq!
+      ((@fields[:exceptions] ||= []) << exception).uniq!
     end
 
     def forward
