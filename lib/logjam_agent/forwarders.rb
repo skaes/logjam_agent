@@ -15,5 +15,9 @@ module LogjamAgent
     def reset
       @@forwarders.each_value {|f| f.reset}
     end
+
+    def inspect
+      super + ": #{@@forwarders.inspect}"
+    end
   end
 end
