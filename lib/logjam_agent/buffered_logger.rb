@@ -85,7 +85,7 @@ module LogjamAgent
     private
 
     def detect_logged_exception(message)
-      matcher = @@exception_matcher && message[matcher]
+      (matcher = @@exception_matcher) && message[matcher]
     end
 
     def self.determine_loaded_exception_classes
