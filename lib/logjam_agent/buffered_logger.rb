@@ -60,7 +60,10 @@ module LogjamAgent
 
     @@exception_classes = []
     def self.auto_detect_exception(exception_class)
-      @@exception_classes << exception_class.to_s
+      # but ignore Exception classes created with Class.new (timeout.rb, my old friend)
+      if (class_name = exception_class.to_s) =~ /^[\w:]+$/
+        @@exception_classes << class_name
+      end
     end
 
     @@exception_matcher = nil
