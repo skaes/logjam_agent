@@ -6,9 +6,10 @@ module LogjamAgent
     def initialize
       @hostname = Socket.gethostname.split('.').first
       @app_name = "rails"
+      @attributes = []
     end
 
-    attr_accessor :extra_attributes
+    attr_accessor :attributes
 
     SEV_LABEL = Logger::SEV_LABEL.map{|sev| "%-5s" % sev}
 
@@ -25,15 +26,19 @@ module LogjamAgent
     end
 
     def call(severity, timestamp, progname, msg)
-      "#{format_severity(severity)} #{format_time(timestamp)} #{@hostname} #{progname||@app_name}[#{$$}]#{render_extra_attributes}: #{format_message(msg)}"
+      "#{format_severity(severity)} #{format_time(timestamp)} #{@hostname} #{progname||@app_name}[#{$$}]#{render_attributes}: #{format_message(msg)}"
     end
 
-    def render_extra_attributes
-      (@extra_attributes || []).map{|key, value| " #{key}[#{value}]"}.join
+    def render_attributes
+      @attributes.map{|key, value| " #{key}[#{value}]"}.join
     end
 
-    def add_extra_attributes(attributes)
-      (@extra_attributes ||= []).concat(attributes)
+    def set_attribute(name, value)
+      if attribute = @attributes.detect{|n,v| n == name}
+        attribute[1] = value
+      else
+        @attributes << [name, value]
+      end
     end
   end
 end
