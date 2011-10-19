@@ -1,17 +1,14 @@
 require "json"
-require "socket"
 
 module LogjamAgent
   class Request
     attr_reader :fields
 
-    @@hostname = Socket.gethostname.split('.').first
-
     def initialize(app, env, logger, initial_fields)
       @logger = logger
       @forwarder = Forwarders.get(app, env)
       @lines = []
-      @fields = initial_fields.merge(:host => @@hostname, :process_id => Process.pid, :lines => @lines)
+      @fields = initial_fields.merge(:host => LogjamAgent.hostname, :process_id => Process.pid, :lines => @lines)
     end
 
     def add_line(severity, timestamp, message)

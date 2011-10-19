@@ -1,10 +1,9 @@
-require 'socket'
 require 'logger'
 
 module LogjamAgent
   class SyslogLikeFormatter
     def initialize
-      @hostname = Socket.gethostname.split('.').first
+      @hostname = LogjamAgent.hostname
       @app_name = "rails"
       @attributes = []
     end

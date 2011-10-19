@@ -1,3 +1,4 @@
+require "socket"
 require "logjam_agent/version"
 require "logjam_agent/amqp_forwarder"
 require "logjam_agent/forwarders"
@@ -17,6 +18,18 @@ module LogjamAgent
 
   mattr_accessor :environment_name
   self.environment_name = nil
+
+  def self.get_hostname
+    n = Socket.gethostname
+    if n.split('.').size > 1
+      n
+    else
+      Socket.gethostbyname(n) rescue n
+    end
+  end
+
+  mattr_accessor :hostname
+  self.hostname = self.get_hostname
 
   def self.disable!
     self.disabled = true

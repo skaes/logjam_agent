@@ -3,7 +3,7 @@ module LogjamAgent
     class Logger < ActiveSupport::LogSubscriber
       def initialize(app)
         @app = app
-        @hostname = Socket.gethostname
+        @hostname = LogjamAgent.hostname
       end
 
       def call(env)
