@@ -24,7 +24,7 @@ module LogjamAgent
     if n.split('.').size > 1
       n
     else
-      Socket.gethostbyname(n) rescue n
+      Socket.gethostbyname(n).first rescue n
     end
   end
 
