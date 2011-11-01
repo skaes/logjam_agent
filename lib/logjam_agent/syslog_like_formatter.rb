@@ -13,7 +13,11 @@ module LogjamAgent
     SEV_LABEL = Logger::SEV_LABEL.map{|sev| "%-5s" % sev}
 
     def format_severity(severity)
-      SEV_LABEL[severity] || 'ALIEN'
+      if severity.is_a?(String)
+        "%-5s" % severity
+      else
+        SEV_LABEL[severity] || 'ALIEN'
+      end
     end
 
     def format_time(timestamp)
