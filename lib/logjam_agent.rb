@@ -1,4 +1,5 @@
 require "socket"
+require "uuid4r"
 require "logjam_agent/version"
 require "logjam_agent/amqp_forwarder"
 require "logjam_agent/forwarders"
