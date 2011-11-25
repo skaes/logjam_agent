@@ -2,13 +2,24 @@ require "json"
 
 module LogjamAgent
   class Request
-    attr_reader :fields
+    attr_reader :caller_id, :fields
 
     def initialize(app, env, logger, initial_fields)
       @logger = logger
+      @app = app
+      @env = env
       @forwarder = Forwarders.get(app, env)
       @lines = []
-      @fields = initial_fields.merge(:host => LogjamAgent.hostname, :process_id => Process.pid, :lines => @lines)
+      @id = UUID4R::uuid(1).gsub('-','')
+      @fields = initial_fields.merge(:request_id => @id, :host => LogjamAgent.hostname, :process_id => Process.pid, :lines => @lines)
+    end
+
+    def id
+      "#{@app}-#{@env}-#{@id}"
+    end
+
+    def caller_id
+      @fields[:caller_id]
     end
 
     def add_line(severity, timestamp, message)
