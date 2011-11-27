@@ -84,6 +84,7 @@ module LogjamAgent
         end
     end
 
+    #TODO: verify socket_timout for ruby 1.9
     def bunny
       @bunny ||=
         begin
