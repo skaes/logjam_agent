@@ -9,8 +9,8 @@ module LogjamAgent
 
     def initialize(*args)
       super(*args)
-      # stupid bug in the buffered logger code
-      @log.write "\n"
+      # stupid bug in the buffered logger code (Rails::VERSION::STRING < "3.2")
+      @log.write "\n" if respond_to?(:buffer)
       @formatter = lambda{|_, _, _, message| message}
     end
 
@@ -47,15 +47,27 @@ module LogjamAgent
         end
       end
       time = Time.now
-      buffer << formatter.call(severity, time, progname, message) << "\n"
-      auto_flush
+      formatted_message = formatter.call(severity, time, progname, message)
+      if respond_to?(:buffer)
+        buffer <<  formatted_message << "\n"
+        auto_flush
+      else # @log is a logger
+        @log << "#{formatted_message}\n"
+      end
       request.add_line(severity, time, message) if request
       message
     end
 
     def logdev=(log_device)
       raise "cannot connect logger to new log device" unless log_device.respond_to?(:write)
-      @log = log_device
+      if respond_to?(:buffer)
+        @log = log_device
+      else
+        @log.instance_eval do
+          raise "cannot set log device" unless defined?(@logdev)
+          @logdev = log_device
+        end
+      end
     end
 
     private
