@@ -1,11 +1,17 @@
 require "socket"
 require "uuid4r"
+require "time_bandits"
+
 require "logjam_agent/version"
 require "logjam_agent/amqp_forwarder"
 require "logjam_agent/forwarders"
 require "logjam_agent/request"
 require "logjam_agent/buffered_logger"
 require "logjam_agent/syslog_like_formatter"
+
+if defined?(Rails) && Rails::VERSION::STRING >= "3.0"
+  require "logjam_agent/railtie"
+end
 
 module LogjamAgent
 
