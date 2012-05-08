@@ -25,7 +25,7 @@ module LogjamAgent
         request = ActionDispatch::Request.new(env)
         path = request.filtered_path
 
-        Rails.logger.request.fields.merge!(:started_at => start_time, :ip => request.ip, :host => @hostname)
+        Rails.logger.request.fields.merge!(:started_at => start_time.iso8601, :ip => request.ip, :host => @hostname)
 
         info "\n\nStarted #{request.request_method} \"#{path}\" for #{request.ip} at #{start_time.to_default_s}"
       end
