@@ -35,7 +35,7 @@ module LogjamAgent
     end
 
     def add(severity, message = nil, progname = nil, &block)
-      return if @level > severity
+      return if level > severity
       request = self.request
       if message.is_a?(Exception)
         request.add_exception(message.class.to_s) if request
