@@ -12,6 +12,7 @@ module LogjamAgent
       @lines = []
       @id = UUID4R::uuid(1).gsub('-','')
       @fields = initial_fields.merge(:request_id => @id, :host => LogjamAgent.hostname, :process_id => Process.pid, :lines => @lines)
+      @mutex = Mutex.new
     end
 
     def id
@@ -23,11 +24,15 @@ module LogjamAgent
     end
 
     def add_line(severity, timestamp, message)
-      @lines << [severity, format_time(timestamp), message.strip]
+      @mutex.synchronize do
+        @lines << [severity, format_time(timestamp), message.strip]
+      end
     end
 
     def add_exception(exception)
-      ((@fields[:exceptions] ||= []) << exception).uniq!
+      @mutex.synchronize do
+        ((@fields[:exceptions] ||= []) << exception).uniq!
+      end
     end
 
     def forward
