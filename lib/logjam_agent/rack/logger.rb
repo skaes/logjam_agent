@@ -50,20 +50,6 @@ module LogjamAgent
         env["time_bandits.metrics"] = TimeBandits.metrics
       end
 
-      HIDDEN_VARIABLES = /\A([a-z]|SERVER|PATH|GATEWAY|REQUEST|SCRIPT|REMOTE|QUERY|PASSENGER|DOCUMENT|SCGI|UNION_STATION)/o
-
-      TRANSLATED_VARIABLES = /\A(HTTP|CONTENT_LENGTH)/
-
-      TRANSLATED_KEYS = Hash.new do |h,k|
-        h[k] = k.sub(/\AHTTP_/,'').split('_').map(&:capitalize).join('-') if k =~ TRANSLATED_VARIABLES
-      end
-
-      REFERER = 'HTTP_REFERER'
-      CONTENT_LENGTH = 'CONTENT_LENGTH'
-
-      KV_RE   = '[^&;=]+'
-      PAIR_RE = %r{(#{KV_RE})=(#{KV_RE})}
-
       def extract_request_info(request)
         request_info = {}
         filter = request.send(:parameter_filter)
@@ -88,10 +74,24 @@ module LogjamAgent
         {}
       end
 
+      HIDDEN_VARIABLES = /\A([a-z]|SERVER|PATH|GATEWAY|REQUEST|SCRIPT|REMOTE|QUERY|PASSENGER|DOCUMENT|SCGI|UNION_STATION|ORIGINAL_FULL_PATH)/o
+
+      TRANSLATED_VARIABLES = /\A(HTTP|CONTENT_LENGTH)/
+
+      TRANSLATED_KEYS = Hash.new do |h,k|
+        h[k] = k.sub(/\AHTTP_/,'').split('_').map(&:capitalize).join('-') if k =~ TRANSLATED_VARIABLES
+      end
+
+      REFERER = 'HTTP_REFERER'
+      CONTENT_LENGTH = 'CONTENT_LENGTH'
+
+      KV_RE   = '[^&;=]+'
+      PAIR_RE = %r{(#{KV_RE})=(#{KV_RE})}
+
       def extract_headers(request, filter)
-        headers = request.filtered_env
-        headers.reject!{|k,v| k =~ HIDDEN_VARIABLES }
+        headers = request.env.reject{|k,v| k =~ HIDDEN_VARIABLES }
         headers.delete(CONTENT_LENGTH) if request.content_length == 0
+        headers = filter.filter(headers)
 
         if referer = headers[REFERER]
           headers[REFERER] = referer.gsub(PAIR_RE) do |_|
