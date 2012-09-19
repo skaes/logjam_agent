@@ -14,7 +14,7 @@ module LogjamAgent
         begin
           rails_version = Rails::VERSION::STRING
           paths = app.config.paths
-          path = (rails_version < "3.2" ? paths.log.to_a : paths['log']).first.to_s
+          path = (rails_version < "3.1" ? paths.log.to_a : paths['log']).first.to_s
           logger = LogjamAgent::BufferedLogger.new(path)
           logger.level = ActiveSupport::BufferedLogger.const_get(app.config.log_level.to_s.upcase)
           logger.formatter = LogjamAgent::SyslogLikeFormatter.new
