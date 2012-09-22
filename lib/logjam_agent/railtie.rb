@@ -12,13 +12,12 @@ module LogjamAgent
     initializer "initialize_logjam_agent_logger", :before => :initialize_logger do |app|
       Rails.logger ||= app.config.logger ||
         begin
-          rails_version = Rails::VERSION::STRING
           paths = app.config.paths
-          path = (rails_version < "3.1" ? paths.log.to_a : paths['log']).first.to_s
+          path = (Rails::VERSION::STRING < "3.1" ? paths.log.to_a : paths['log']).first.to_s
           logger = LogjamAgent::BufferedLogger.new(path)
           logger.level = ActiveSupport::BufferedLogger.const_get(app.config.log_level.to_s.upcase)
           logger.formatter = LogjamAgent::SyslogLikeFormatter.new
-          logger.auto_flushing = false if Rails.env.production? && rails_version < "3.2"
+          logger.auto_flushing = false if Rails.env.production? && Rails::VERSION::STRING < "3.2"
           logger
         rescue StandardError => e
           logger = LogjamAgent::BufferedLogger.new(STDERR)
@@ -29,6 +28,9 @@ module LogjamAgent
                       )
           logger
         end
+      if Rails::VERSION::STRING < "3.2"
+        at_exit { Rails.logger.flush if Rails.logger.respond_to?(:flush) }
+      end
     end
 
     initializer "logjam_agent", :after => "time_bandits" do |app|
