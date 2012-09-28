@@ -52,6 +52,8 @@ module LogjamAgent
 
       def extract_request_info(request)
         request_info = {}
+        result = { :request_info => request_info }
+
         filter = request.send(:parameter_filter)
 
         request_info[:method] = request.method
@@ -68,10 +70,10 @@ module LogjamAgent
           request_info[:body_parameters] = body_params unless body_params.empty?
         end
 
-        { :request_info => request_info }
+        result
       rescue Exception
         Rails.logger.error($!)
-        {}
+        result
       end
 
       HIDDEN_VARIABLES = /\A([a-z]|SERVER|PATH|GATEWAY|REQUEST|SCRIPT|REMOTE|QUERY|PASSENGER|DOCUMENT|SCGI|UNION_STATION|ORIGINAL_FULLPATH|RAW_POST_DATA)/o
