@@ -38,6 +38,19 @@ module LogjamAgent
       app.config.middleware.insert_before("LogjamAgent::Rack::Logger", "LogjamAgent::Middleware")
     end
 
+    # make
+    ActiveSupport.on_load(:action_controller) do
+      ActionDispatch::Http::UploadedFile.class_eval <<-"EVA"
+        def to_hash
+          {
+            :original_filename => original_filename,
+            :content_type => content_type,
+            :headers => headers,
+            :tempfile => { :path => tempfile.path }
+          }
+        end
+      EVA
+    end
   end
 end
 
