@@ -1,4 +1,8 @@
-require "json"
+begin
+  require "oj"
+rescue LoadError
+  require "json"
+end
 
 module LogjamAgent
   class Request
@@ -37,12 +41,24 @@ module LogjamAgent
 
     def forward
       engine = @fields.delete(:engine)
-      @forwarder.forward(@fields.to_json, engine)
+      @forwarder.forward(encode_payload, engine)
     rescue Exception => e
       handle_forwarding_error(e)
     end
 
     private
+
+    if defined?(Oj)
+      def encode_payload
+        Oj.dump(@fields, :mode => :compat)
+      rescue
+        @fields.to_son
+      end
+    else
+      def encode_payload
+        @fields.to_json
+      end
+    end
 
     def format_time(t)
       # iso time with microseconds
