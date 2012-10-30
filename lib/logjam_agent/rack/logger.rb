@@ -27,7 +27,7 @@ module LogjamAgent
         path = request.filtered_path
 
         logjam_fields = Rails.logger.request.fields
-        logjam_fields.merge!(:started_at => start_time.iso8601, :ip => request.ip, :host => @hostname)
+        logjam_fields.merge!(:started_at => start_time.iso8601, :ip => request.remote_ip, :host => @hostname)
         logjam_fields.merge!(extract_request_info(request))
 
         info "\n\nStarted #{request.request_method} \"#{path}\" for #{request.ip} at #{start_time.to_default_s}"
