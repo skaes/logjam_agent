@@ -20,7 +20,7 @@ module LogjamAgent
       def before_dispatch(env, start_time)
         TimeBandits.reset
 
-        Thread.current[:time_bandits_completed_info] = nil
+        Thread.current.thread_variable_set(:time_bandits_completed_info, nil)
 
         request = ActionDispatch::Request.new(env)
 
@@ -35,7 +35,7 @@ module LogjamAgent
 
       def after_dispatch(env, result, run_time_ms)
         status = result ? result.first : 500
-        duration, additions, view_time, action = Thread.current[:time_bandits_completed_info]
+        duration, additions, view_time, action = Thread.thread_variable_get(:time_bandits_completed_info)
 
         request_info = {:total_time => run_time_ms, :code => status, :action => action, :view_time => view_time || 0.0}
 

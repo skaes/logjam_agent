@@ -15,11 +15,11 @@ module LogjamAgent
     end
 
     def request
-      Thread.current[:logjam_request]
+      Thread.current.thread_variable_get(:logjam_request)
     end
 
     def request=(request)
-      Thread.current[:logjam_request] = request
+      Thread.current.thread_variable_set(:logjam_request, request)
     end
 
     def start_request(app, env, initial_fields={})
@@ -36,7 +36,7 @@ module LogjamAgent
 
     def add(severity, message = nil, progname = nil, &block)
       return if level > severity
-      request = self.request || Thread.main[:logjam_request]
+      request = self.request || Thread.main.thread_variable_get(:logjam_request)
       if message.is_a?(Exception)
         request.add_exception(message.class.to_s) if request
         message = format_exception(message)
