@@ -77,7 +77,7 @@ module LogjamAgent
     end
 
     def format_exception(exception)
-      msg = "#{exception.class} (#{exception.message})"
+      msg = "#{exception.class}(#{exception.message})"
       if backtrace = exception.backtrace
         backtrace = Rails.backtrace_cleaner.clean(backtrace, :all) if defined?(Rails)
         msg << ":\n  #{backtrace.join("\n  ")}"
