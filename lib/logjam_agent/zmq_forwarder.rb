@@ -23,7 +23,7 @@ module LogjamAgent
     @@mutex = Mutex.new
     @@zmq_context = nil
 
-    def context
+    def self.context
       @@mutex.synchronize do
         @@zmq_context ||=
           begin
@@ -42,15 +42,16 @@ module LogjamAgent
           socket.setsockopt(ZMQ::LINGER, 100)
           socket.setsockopt(ZMQ::SNDHWM, 10)
           @zmq_hosts.each do |host|
-            socket.connect("tcp://#{host}:#{port}")
+            socket.connect("tcp://#{host}:#{@zmq_port}")
           end
+          at_exit { reset }
           socket
         end
     end
 
     def reset
       return unless @socket
-      puts "closing socket"
+      # $stderr.puts "closing socket"
       @socket.close
       @socket = nil
     end
@@ -58,19 +59,19 @@ module LogjamAgent
     def forward(msg, engine)
       return if LogjamAgent.disabled
       begin
-        $stderr.puts msg
         key = @config[:routing_key]
         key += ".#{engine}" if engine
         publish(key, msg)
       rescue Exception => exception
         reraise_expectation_errors!
+        raise ForwardingError.new(exception.message)
       end
     end
 
     def publish(key, data)
       parts = [@exchange, key, data]
       if socket.send_strings(parts, ZMQ::NonBlocking) < 0
-        raise "failed to send zeromq message: #{ZMQ::Util.error_string}"
+        raise "ZMQ error: #{ZMQ::Util.error_string}"
       end
     end
 
