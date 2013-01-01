@@ -1,6 +1,5 @@
 module LogjamAgent
   class ZMQForwarder
-
     attr_reader :app, :env
 
     def initialize(app, env, opts = {})
@@ -8,34 +7,43 @@ module LogjamAgent
       @env = env
       @config = default_options(app, env).merge!(opts)
       @exchange = @config[:exchange]
-      @zmq_host = @config[:host]
-      # TODO: we should probably try to shut down cleanly
-      # at_exit { shutdown }
+      @zmq_hosts = Array(@config[:host])
+      @zmq_port = @config[:port]
     end
 
     def default_options(app, env)
       {
         :host         => "localhost",
         :exchange     => "request-stream-#{app}-#{env}",
-        :routing_key  => "logs.#{app}.#{env}"
+        :routing_key  => "logs.#{app}.#{env}",
+        :port         => 12345
       }
     end
 
+    @@mutex = Mutex.new
+    @@zmq_context = nil
+
     def context
-      @context ||=
-        begin
-          require 'zmq'
-          ZMQ::Context.new(1)
-        end
+      @@mutex.synchronize do
+        @@zmq_context ||=
+          begin
+            require 'ffi-rzmq'
+            context = ZMQ::Context.new(1)
+            at_exit { context.terminate }
+            context
+          end
+      end
     end
 
     def socket
       @socket ||=
         begin
-          socket = context.socket(ZMQ::PUSH)
+          socket = self.class.context.socket(ZMQ::PUSH)
           socket.setsockopt(ZMQ::LINGER, 100)
-          socket.setsockopt(ZMQ::HWM, 10)
-          socket.connect("tcp://#{@zmq_host}:12345")
+          socket.setsockopt(ZMQ::SNDHWM, 10)
+          @zmq_hosts.each do |host|
+            socket.connect("tcp://#{host}:#{port}")
+          end
           socket
         end
     end
@@ -45,14 +53,6 @@ module LogjamAgent
       puts "closing socket"
       @socket.close
       @socket = nil
-    end
-
-    def shutdown
-      reset
-      if @context
-        puts "closing context"
-        @context.close
-      end
     end
 
     def forward(msg, engine)
@@ -68,11 +68,9 @@ module LogjamAgent
     end
 
     def publish(key, data)
-      if socket.send(@exchange, ZMQ::SNDMORE|ZMQ::NOBLOCK)
-        socket.send(key, ZMQ::SNDMORE|ZMQ::NOBLOCK)
-        socket.send(data, ZMQ::NOBLOCK)
-      else
-        raise "failed to send zeromq message"
+      parts = [@exchange, key, data]
+      if socket.send_strings(parts, ZMQ::NonBlocking) < 0
+        raise "failed to send zeromq message: #{ZMQ::Util.error_string}"
       end
     end
 
