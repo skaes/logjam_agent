@@ -27,6 +27,9 @@ module LogjamAgent
   mattr_accessor :environment_name
   self.environment_name = nil
 
+  mattr_accessor :action_name_proc
+  self.action_name_proc = lambda{|name| name}
+
   def self.get_hostname
     n = Socket.gethostname
     if n.split('.').size > 1

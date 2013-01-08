@@ -37,7 +37,8 @@ module LogjamAgent
         status = result ? result.first : 500
         duration, additions, view_time, action = Thread.current.thread_variable_get(:time_bandits_completed_info)
 
-        request_info = {:total_time => run_time_ms, :code => status, :action => action, :view_time => view_time || 0.0}
+        action_name = LogjamAgent.action_name_proc.call(action)
+        request_info = {:total_time => run_time_ms, :code => status, :action => action_name, :view_time => view_time || 0.0}
 
         message = "Completed #{status} #{::Rack::Utils::HTTP_STATUS_CODES[status]} in %.1fms" % run_time_ms
         message << " (#{additions.join(' | ')})" unless additions.blank?
