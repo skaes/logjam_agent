@@ -87,4 +87,25 @@ module LogjamAgent
     EOS
   end
 
+  def self.event(label, extra_fields = {})
+    logjam_fields = {
+      :label      => label,
+      :started_at => Time.now.iso8601,
+      :host       => hostname
+    }
+    logjam_fields.merge!(extra_fields)
+
+    json_message = Oj.dump(logjam_fields, :format => :compat)
+    forwarder.forward(json_message, nil, :routing_key => events_routing_key)
+  end
+
+  private
+
+  def self.events_routing_key
+    "events.#{application_name}.#{environment_name}"
+  end
+
+  def self.forwarder
+    @forwarder ||= Forwarders.get(application_name, environment_name)
+  end
 end
