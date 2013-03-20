@@ -52,7 +52,7 @@ module LogjamAgent
       def encode_payload
         Oj.dump(@fields, :mode => :compat)
       rescue
-        @fields.to_son
+        @fields.to_json
       end
     else
       def encode_payload
