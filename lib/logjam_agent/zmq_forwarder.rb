@@ -56,11 +56,13 @@ module LogjamAgent
       @socket = nil
     end
 
-    def forward(msg, engine)
+    def forward(msg, options={})
       return if LogjamAgent.disabled
       begin
-        key = @config[:routing_key]
-        key += ".#{engine}" if engine
+        key = options[:routing_key] || @config[:routing_key]
+        if engine = options[:engine]
+          key += ".#{engine}"
+        end
         publish(key, msg)
       rescue Exception => exception
         reraise_expectation_errors!

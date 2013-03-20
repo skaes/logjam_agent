@@ -96,7 +96,7 @@ module LogjamAgent
     logjam_fields.merge!(extra_fields)
 
     json_message = Oj.dump(logjam_fields, :format => :compat)
-    forwarder.forward(json_message, nil, :routing_key => events_routing_key)
+    forwarder.forward(json_message, :routing_key => events_routing_key)
   end
 
   private

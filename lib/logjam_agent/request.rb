@@ -41,7 +41,7 @@ module LogjamAgent
 
     def forward
       engine = @fields.delete(:engine)
-      @forwarder.forward(encode_payload, engine)
+      @forwarder.forward(encode_payload, :engine => engine)
     rescue Exception => e
       handle_forwarding_error(e)
     end
