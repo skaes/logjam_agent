@@ -41,24 +41,12 @@ module LogjamAgent
 
     def forward
       engine = @fields.delete(:engine)
-      @forwarder.forward(encode_payload, :engine => engine)
+      @forwarder.forward(LogjamAgent.encode_payload(@fields), :engine => engine)
     rescue Exception => e
       handle_forwarding_error(e)
     end
 
     private
-
-    if defined?(Oj)
-      def encode_payload
-        Oj.dump(@fields, :mode => :compat)
-      rescue
-        @fields.to_json
-      end
-    else
-      def encode_payload
-        @fields.to_json
-      end
-    end
 
     def format_time(t)
       # iso time with microseconds

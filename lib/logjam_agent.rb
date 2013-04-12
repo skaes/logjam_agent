@@ -87,16 +87,26 @@ module LogjamAgent
     EOS
   end
 
+  # setup json encoding
+  begin
+    require "oj"
+    def self.encode_payload(data)
+      Oj.dump(data, :mode => :compat)
+    end
+  rescue LoadError
+    def self.encode_payload(data)
+      data.to_json
+    end
+  end
+
   def self.event(label, extra_fields = {})
-    logjam_fields = {
+    fields = {
       :label      => label,
       :started_at => Time.now.iso8601,
       :host       => hostname
     }
-    logjam_fields.merge!(extra_fields)
-
-    json_message = Oj.dump(logjam_fields, :format => :compat)
-    forwarder.forward(json_message, :routing_key => events_routing_key)
+    fields.merge!(extra_fields)
+    forwarder.forward(encode_payload(fields), :routing_key => events_routing_key)
   end
 
   private
