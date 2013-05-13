@@ -35,10 +35,9 @@ module LogjamAgent
 
       def after_dispatch(env, result, run_time_ms)
         status = result ? result.first : 500
-        duration, additions, view_time, action = Thread.current.thread_variable_get(:time_bandits_completed_info)
+        _, additions, view_time, _ = Thread.current.thread_variable_get(:time_bandits_completed_info)
 
-        action_name = LogjamAgent.action_name_proc.call(action)
-        request_info = {:total_time => run_time_ms, :code => status, :action => action_name, :view_time => view_time || 0.0}
+        request_info = {:total_time => run_time_ms, :code => status, :view_time => view_time || 0.0}
 
         message = "Completed #{status} #{::Rack::Utils::HTTP_STATUS_CODES[status]} in %.1fms" % run_time_ms
         message << " (#{additions.join(' | ')})" unless additions.blank?
@@ -113,4 +112,32 @@ module LogjamAgent
 
     end
   end
+end
+
+# patch the actioncontroller logsubscriber to set the action on the logjam logger as soon as it starts processing the request
+require 'action_controller/metal/instrumentation'
+require 'action_controller/log_subscriber'
+
+module ActionController #:nodoc:
+
+  class LogSubscriber
+    def start_processing(event)
+      payload = event.payload
+      params  = payload[:params].except(*INTERNAL_PARAMS)
+      format  = payload[:format]
+      format  = format.to_s.upcase if format.is_a?(Symbol)
+
+      controller = payload[:controller]
+      action = payload[:action]
+      full_name = "#{controller}##{action}"
+      action_name = LogjamAgent.action_name_proc.call(full_name)
+
+      # puts "setting logjam action to #{action_name}"
+      Rails.logger.request.fields[:action] = action_name
+
+      info "Processing by #{full_name} as #{format}"
+      info "  Parameters: #{params.inspect}" unless params.empty?
+    end
+  end
+
 end
