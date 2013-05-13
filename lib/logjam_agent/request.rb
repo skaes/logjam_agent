@@ -23,6 +23,10 @@ module LogjamAgent
       "#{@app}-#{@env}-#{@id}"
     end
 
+    def action
+      @fields[:action]
+    end
+
     def caller_id
       @fields[:caller_id]
     end
