@@ -6,7 +6,7 @@ end
 
 module LogjamAgent
   class Request
-    attr_reader :caller_id, :fields
+    attr_reader :fields
 
     def initialize(app, env, logger, initial_fields)
       @logger = logger
@@ -25,6 +25,10 @@ module LogjamAgent
 
     def caller_id
       @fields[:caller_id]
+    end
+
+    def caller_action
+      @fields[:caller_action]
     end
 
     def add_line(severity, timestamp, message)

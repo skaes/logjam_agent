@@ -22,10 +22,11 @@ module LogjamAgent
     private
 
     def start_request(env)
-      app_name  = env["logjam_agent.application_name"] || LogjamAgent.application_name
-      env_name  = env["logjam_agent.environment_name"] || LogjamAgent.environment_name
-      caller_id = env["HTTP_X_LOGJAM_CALLER_ID"] || ""
-      Rails.logger.start_request(app_name, env_name, :caller_id => caller_id)
+      app_name      = env["logjam_agent.application_name"] || LogjamAgent.application_name
+      env_name      = env["logjam_agent.environment_name"] || LogjamAgent.environment_name
+      caller_id     = env["HTTP_X_LOGJAM_CALLER_ID"] || ""
+      caller_action = env["HTTP_X_LOGJAM_ACTION"] || ""
+      Rails.logger.start_request(app_name, env_name, :caller_id => caller_id, :caller_action => caller_action)
     end
 
     def finish_request(env)
