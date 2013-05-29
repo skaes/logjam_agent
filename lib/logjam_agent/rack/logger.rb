@@ -1,4 +1,7 @@
 module LogjamAgent
+
+  class CallerTimeoutExceeded < StandardError; end
+
   module Rack
     class Logger < ActiveSupport::LogSubscriber
       def initialize(app)
@@ -38,6 +41,10 @@ module LogjamAgent
         _, additions, view_time, _ = Thread.current.thread_variable_get(:time_bandits_completed_info)
 
         request_info = {:total_time => run_time_ms, :code => status, :view_time => view_time || 0.0}
+
+        if (allowed_time_ms = env['HTTP_X_LOGJAM_CALLER_TIMEOUT'].to_i) > 0 && (run_time_ms > allowed_time_ms)
+          warn LogjamAgent::CallerTimeoutExceeded.new("exceeded allowed time by #{(run_time_ms.to_i - allowed_time_ms)} ms")
+        end
 
         message = "Completed #{status} #{::Rack::Utils::HTTP_STATUS_CODES[status]} in %.1fms" % run_time_ms
         message << " (#{additions.join(' | ')})" unless additions.blank?
