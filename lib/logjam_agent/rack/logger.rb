@@ -61,9 +61,10 @@ module LogjamAgent
       end
 
       def after_dispatch(env, result, run_time_ms)
-        status = result ? result.first : 500
-        _, additions, view_time, _ = Thread.current.thread_variable_get(:time_bandits_completed_info)
-
+        status = result ? result.first.to_i : 500
+        if completed_info = Thread.current.thread_variable_get(:time_bandits_completed_info)
+          _, additions, view_time, _ = completed_info
+        end
         request_info = {:total_time => run_time_ms, :code => status, :view_time => view_time || 0.0}
 
         if (allowed_time_ms = env['HTTP_X_LOGJAM_CALLER_TIMEOUT'].to_i) > 0 && (run_time_ms > allowed_time_ms)
