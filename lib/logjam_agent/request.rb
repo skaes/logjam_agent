@@ -6,7 +6,7 @@ end
 
 module LogjamAgent
   class Request
-    attr_reader :fields
+    attr_reader :fields, :uuid
 
     def initialize(app, env, logger, initial_fields)
       @logger = logger
@@ -14,13 +14,13 @@ module LogjamAgent
       @env = env
       @forwarder = Forwarders.get(app, env)
       @lines = []
-      @id = UUID4R::uuid(1).gsub('-','')
-      @fields = initial_fields.merge(:request_id => @id, :host => LogjamAgent.hostname, :process_id => Process.pid, :lines => @lines)
+      @uuid = UUID4R::uuid(1).gsub('-','')
+      @fields = initial_fields.merge(:request_id => @uuid, :host => LogjamAgent.hostname, :process_id => Process.pid, :lines => @lines)
       @mutex = Mutex.new
     end
 
     def id
-      "#{@app}-#{@env}-#{@id}"
+      "#{@app}-#{@env}-#{@uuid}"
     end
 
     def action
@@ -49,6 +49,7 @@ module LogjamAgent
 
     def forward
       engine = @fields.delete(:engine)
+      # puts @fields.inspect
       @forwarder.forward(LogjamAgent.encode_payload(@fields), :engine => engine)
     rescue Exception => e
       handle_forwarding_error(e)

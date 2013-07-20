@@ -15,13 +15,15 @@ module LogjamAgent
           paths = app.config.paths
           path = (Rails::VERSION::STRING < "3.1" ? paths.log.to_a : paths['log']).first.to_s
           logger = LogjamAgent::BufferedLogger.new(path)
-          logger.level = ActiveSupport::BufferedLogger.const_get(app.config.log_level.to_s.upcase)
+          logger.level = ::Logger.const_get(app.config.log_level.to_s.upcase)
           logger.formatter = LogjamAgent::SyslogLikeFormatter.new
           logger.auto_flushing = false if Rails.env.production? && Rails::VERSION::STRING < "3.2"
+          logger = ActiveSupport::TaggedLogging.new(logger) if Rails::VERSION::STRING >= "3.2"
           logger
-        rescue StandardError => e
+        rescue StandardError
           logger = LogjamAgent::BufferedLogger.new(STDERR)
-          logger.level = ActiveSupport::BufferedLogger::WARN
+          logger = ActiveSupport::TaggedLogging.new(logger) if Rails::VERSION::STRING >= "3.2"
+          logger.level = ::Logger::WARN
           logger.warn(
                       "Logging Error: Unable to access log file. Please ensure that #{path} exists and is writable. " +
                       "The log level has been raised to WARN and the output directed to STDERR until the problem is fixed."

@@ -4,28 +4,51 @@ module LogjamAgent
 
   module Rack
     class Logger < ActiveSupport::LogSubscriber
-      def initialize(app)
+      def initialize(app, taggers = nil)
         @app = app
+        @taggers = taggers || Rails.application.config.log_tags || []
         @hostname = LogjamAgent.hostname
       end
 
       def call(env)
+        request = ActionDispatch::Request.new(env)
+
+        if logger.respond_to?(:tagged) && !@taggers.empty?
+          logger.tagged(compute_tags(request)) { call_app(request, env) }
+        else
+          call_app(request, env)
+        end
+      end
+
+      protected
+
+      def call_app(request, env)
         start_time = Time.now
-        before_dispatch(env, start_time)
+        before_dispatch(request, env, start_time)
         result = @app.call(env)
       ensure
         run_time = Time.now - start_time
         after_dispatch(env, result, run_time*1000)
       end
 
-      protected
+      def compute_tags(request)
+        @taggers.collect do |tag|
+          case tag
+          when :uuid
+            Rails.logger.request.uuid
+          when Proc
+            tag.call(request)
+          when Symbol
+            request.send(tag)
+          else
+            tag
+          end
+        end
+      end
 
-      def before_dispatch(env, start_time)
+      def before_dispatch(request, env, start_time)
         TimeBandits.reset
-
         Thread.current.thread_variable_set(:time_bandits_completed_info, nil)
-
-        request = ActionDispatch::Request.new(env)
 
         path = request.filtered_path
 
@@ -33,7 +56,8 @@ module LogjamAgent
         logjam_fields.merge!(:started_at => start_time.iso8601, :ip => request.remote_ip, :host => @hostname)
         logjam_fields.merge!(extract_request_info(request))
 
-        info "\n\nStarted #{request.request_method} \"#{path}\" for #{request.ip} at #{start_time.to_default_s}"
+        debug ""
+        info "Started #{request.request_method} \"#{path}\" for #{request.ip} at #{start_time.to_default_s}"
       end
 
       def after_dispatch(env, result, run_time_ms)
@@ -78,8 +102,8 @@ module LogjamAgent
         end
 
         result
-      rescue Exception
-        Rails.logger.error($!)
+      rescue Exception => e
+        Rails.logger.error(e)
         result
       end
 
@@ -128,7 +152,7 @@ require 'action_controller/log_subscriber'
 module ActionController #:nodoc:
 
   class LogSubscriber
-    if Rails::VERSION::STRING =~ /^3.0/
+    if Rails::VERSION::STRING =~ /\A3\.0/
       def start_processing(event)
         payload = event.payload
         params  = payload[:params].except(*INTERNAL_PARAMS)
@@ -138,14 +162,13 @@ module ActionController #:nodoc:
         full_name = "#{controller}##{action}"
         action_name = LogjamAgent.action_name_proc.call(full_name)
 
-        # puts "setting logjam action to #{action_name}"
         Rails.logger.request.fields[:action] = action_name
 
         info "  Processing by #{full_name} as #{payload[:formats].first.to_s.upcase}"
         info "  Parameters: #{params.inspect}" unless params.empty?
       end
 
-    elsif Rails::VERSION::STRING =~ /^3.1/
+    elsif Rails::VERSION::STRING =~ /\A3\.1/
 
       def start_processing(event)
         payload = event.payload
@@ -158,14 +181,13 @@ module ActionController #:nodoc:
         full_name = "#{controller}##{action}"
         action_name = LogjamAgent.action_name_proc.call(full_name)
 
-        # puts "setting logjam action to #{action_name}"
         Rails.logger.request.fields[:action] = action_name
 
         info "  Processing by #{full_name} as #{format}"
         info "  Parameters: #{params.inspect}" unless params.empty?
       end
 
-    elsif Rails::VERSION::STRING =~ /^3.2/
+    elsif Rails::VERSION::STRING =~ /\A(3\.2|4\.0)/
 
       def start_processing(event)
         payload = event.payload
@@ -178,7 +200,6 @@ module ActionController #:nodoc:
         full_name = "#{controller}##{action}"
         action_name = LogjamAgent.action_name_proc.call(full_name)
 
-        # puts "setting logjam action to #{action_name}"
         Rails.logger.request.fields[:action] = action_name
 
         info "Processing by #{full_name} as #{format}"

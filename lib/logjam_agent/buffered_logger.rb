@@ -1,16 +1,44 @@
-require 'active_support/buffered_logger'
-require 'active_support/core_ext/logger'
 require 'fileutils'
 
+if ActiveSupport::VERSION::STRING < "4.0"
+  require 'active_support/buffered_logger'
+  require 'active_support/core_ext/logger'
+else
+  require 'active_support/logger'
+
+  class LogjamAgent::ConsoleFormatter < Logger::Formatter
+    # This method is invoked when a log event occurs
+    def call(severity, timestamp, progname, msg)
+      "[#{format_time(timestamp)}] #{String === msg ? msg : msg.inspect}\n"
+    end
+
+    def format_time(timestamp)
+      timestamp.strftime("%H:%M:%S.#{"%06d" % timestamp.usec}")
+    end
+  end
+
+  class ActiveSupport::Logger
+    class << self
+      alias_method :original_broadcast, :broadcast
+      def broadcast(logger)
+        logger.formatter = LogjamAgent::ConsoleFormatter.new
+        logger.formatter.extend(ActiveSupport::TaggedLogging::Formatter)
+        original_broadcast(logger)
+      end
+    end
+  end
+end
+
 module LogjamAgent
-  class BufferedLogger < ActiveSupport::BufferedLogger
+  class BufferedLogger < ( ActiveSupport::VERSION::STRING < "4.0" ?
+                           ActiveSupport::BufferedLogger : ActiveSupport::Logger )
 
     attr_accessor :formatter
 
     def initialize(*args)
       super(*args)
       # stupid bug in the buffered logger code (Rails::VERSION::STRING < "3.2")
-      @log.write "\n" if respond_to?(:buffer)
+      @log.write "\n" if @log && respond_to?(:buffer)
       @formatter = lambda{|_, _, _, message| message}
     end
 
@@ -36,6 +64,8 @@ module LogjamAgent
 
     def add(severity, message = nil, progname = nil, &block)
       return if level > severity
+      message = progname if message.nil?
+      progname = nil # rails 3.2 bug when using tagged logging
       request = self.request || Thread.main.thread_variable_get(:logjam_request)
       if message.is_a?(Exception)
         request.add_exception(message.class.to_s) if request
@@ -51,8 +81,10 @@ module LogjamAgent
       if respond_to?(:buffer)
         buffer <<  formatted_message << "\n"
         auto_flush
-      else # @log is a logger
+      elsif @log # @log is a logger (or nil for rails 4)
         @log << "#{formatted_message}\n"
+      elsif @logdev
+        @logdev.write(formatted_message)
       end
       request.add_line(severity, time, message) if request
       message
@@ -63,7 +95,7 @@ module LogjamAgent
       if respond_to?(:buffer)
         @log = log_device
       else
-        @log.instance_eval do
+        (@log||self).instance_eval do
           raise "cannot set log device" unless defined?(@logdev)
           @logdev = log_device
         end

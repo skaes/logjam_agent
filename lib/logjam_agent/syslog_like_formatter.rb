@@ -6,6 +6,7 @@ module LogjamAgent
       @hostname = LogjamAgent.hostname
       @app_name = "rails"
       @attributes = []
+      @newline = ActiveSupport::VERSION::STRING < "4.0" ? "" : "\n"
     end
 
     attr_accessor :attributes
@@ -29,7 +30,15 @@ module LogjamAgent
     end
 
     def call(severity, timestamp, progname, msg)
-      "#{format_severity(severity)} #{format_time(timestamp)} #{@hostname} #{progname||@app_name}[#{$$}]#{render_attributes}: #{format_message(msg)}"
+      "#{format_severity(severity)} #{format_time(timestamp)}#{render_attributes}#{format_host_info(progname)}: #{format_message(msg)}#{@newline}"
+    end
+
+    if Rails.env.development?
+      def format_host_info(proganme); ""; end
+    else
+      def format_host_info(proganme)
+       " #{@hostname} #{progname||@app_name}[#{$$}]"
+      end
     end
 
     def render_attributes
