@@ -15,7 +15,9 @@ module LogjamAgent
     ensure
       headers = result[1]
       headers["X-Logjam-Request-Id"] = request.id
-      headers["X-Logjam-Caller-Id"] = request.fields[:caller_id]
+      unless (caller_id = request.fields[:caller_id]).blank?
+        headers["X-Logjam-Caller-Id"] = caller_id
+      end
       finish_request(env)
     end
 
