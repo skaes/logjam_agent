@@ -3,6 +3,23 @@ require 'fileutils'
 if ActiveSupport::VERSION::STRING < "4.0"
   require 'active_support/buffered_logger'
   require 'active_support/core_ext/logger'
+  if ActiveSupport::VERSION::STRING < "4.0"
+    require 'active_support/tagged_logging'
+    # monkey patch to handle exceptions correctly
+    # not needed for rails 4 as this uses a Formatter to add the tags
+    class ActiveSupport::TaggedLogging
+      def initialize(logger)
+        @logger = logger
+        if logger.is_a?(LogjamAgent::BufferedLogger)
+          self.class.class_eval <<-EVAL, __FILE__, __LINE__ + 1
+            def add(severity, message = nil, progname = nil, &block)
+              @logger.add(severity, message, progname, tags_text, &block)
+            end
+          EVAL
+        end
+      end
+    end
+  end
 else
   require 'active_support/logger'
 
@@ -62,20 +79,22 @@ module LogjamAgent
       end
     end
 
-    def add(severity, message = nil, progname = nil, &block)
+    def add(severity, message = nil, progname = nil, tags_text = nil, &block)
       return if level > severity
       message = progname if message.nil?
-      progname = nil # rails 3.2 bug when using tagged logging
+      progname = nil
+      message ||= block.call || '' if block
       request = self.request || Thread.main.thread_variable_get(:logjam_request)
       if message.is_a?(Exception)
         request.add_exception(message.class.to_s) if request
         message = format_exception(message)
       else
-        message = (message || (block && block.call) || '').to_s
+        message = message.to_s
         if request && severity >= Logger::ERROR && (e = detect_logged_exception(message))
           request.add_exception(e)
         end
       end
+      message = "#{tags_text}#{message}" unless tags_text.blank?
       time = Time.now
       formatted_message = formatter.call(severity, time, progname, message)
       if respond_to?(:buffer)
