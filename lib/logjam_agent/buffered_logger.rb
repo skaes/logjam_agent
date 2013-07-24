@@ -3,7 +3,7 @@ require 'fileutils'
 if ActiveSupport::VERSION::STRING < "4.0"
   require 'active_support/buffered_logger'
   require 'active_support/core_ext/logger'
-  if ActiveSupport::VERSION::STRING < "4.0"
+  if ActiveSupport::VERSION::STRING >= "3.2"
     require 'active_support/tagged_logging'
     # monkey patch to handle exceptions correctly
     # not needed for rails 4 as this uses a Formatter to add the tags
