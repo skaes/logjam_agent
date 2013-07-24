@@ -34,7 +34,7 @@ module LogjamAgent
     end
 
     if Rails.env.development?
-      def format_host_info(proganme); ""; end
+      def format_host_info(progname); ""; end
     else
       def format_host_info(progname)
        " #{@hostname} #{progname||@app_name}[#{$$}]"
