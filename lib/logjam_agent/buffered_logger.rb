@@ -84,7 +84,7 @@ module LogjamAgent
       message = progname if message.nil?
       progname = nil
       message ||= block.call || '' if block
-      request = self.request || Thread.main.thread_variable_get(:logjam_request)
+      request = self.request
       if message.is_a?(Exception)
         request.add_exception(message.class.to_s) if request
         message = format_exception(message)
