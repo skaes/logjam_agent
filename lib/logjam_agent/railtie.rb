@@ -40,6 +40,22 @@ module LogjamAgent
     initializer "logjam_agent", :after => "time_bandits" do |app|
       app.config.middleware.swap("TimeBandits::Rack::Logger", "LogjamAgent::Rack::Logger")
       app.config.middleware.insert_before("LogjamAgent::Rack::Logger", "LogjamAgent::Middleware")
+
+      # patch controller testing to create a logjam request, because middlewares aren't executed
+      if Rails.env.test?
+        ActiveSupport.on_load(:action_controller) do
+          require 'action_controller/test_case'
+          module ActionController::TestCase::Behavior
+            def process_with_logjam(*args)
+              LogjamAgent.start_request
+              process_without_logjam(*args)
+            ensure
+              LogjamAgent.finish_request
+            end
+            alias_method_chain :process, :logjam
+          end
+        end
+      end
     end
 
     # make
