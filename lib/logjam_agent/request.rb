@@ -8,8 +8,7 @@ module LogjamAgent
   class Request
     attr_reader :fields, :uuid
 
-    def initialize(app, env, logger, initial_fields)
-      @logger = logger
+    def initialize(app, env, initial_fields)
       @app = app
       @env = env
       @forwarder = Forwarders.get(app, env)
@@ -63,7 +62,7 @@ module LogjamAgent
     end
 
     def handle_forwarding_error(exception)
-      @logger.error exception.to_s
+      LogjamAgent.logger.error exception.to_s if LogjamAgent.logger
       LogjamAgent.error_handler.call(exception)
     rescue Exception
       # swallow all exceptions

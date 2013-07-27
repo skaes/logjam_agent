@@ -2,6 +2,30 @@ require "socket"
 require "uuid4r"
 require "time_bandits"
 
+module LogjamAgent
+  module RequestHandling
+    def request
+      Thread.current.thread_variable_get(:logjam_request)
+    end
+
+    def request=(request)
+      Thread.current.thread_variable_set(:logjam_request, request)
+    end
+
+    def start_request(app = LogjamAgent.application_name, env = LogjamAgent.environment_name, initial_fields = {})
+      self.request = Request.new(app, env, initial_fields)
+    end
+
+    def finish_request(additional_fields = {})
+      if request = self.request
+        request.fields.merge!(additional_fields)
+        self.request = nil
+        request.forward
+      end
+    end
+  end
+end
+
 require "logjam_agent/version"
 require "logjam_agent/amqp_forwarder"
 require "logjam_agent/zmq_forwarder"
@@ -17,6 +41,9 @@ end
 module LogjamAgent
 
   class ForwardingError < StandardError; end
+
+  mattr_accessor :logger
+  self.logger = nil
 
   mattr_accessor :error_handler
   self.error_handler = lambda { |exception| }
@@ -52,6 +79,8 @@ module LogjamAgent
 
   mattr_accessor :disabled
   self.disabled = false
+
+  extend RequestHandling
 
   mattr_accessor :exception_classes
   self.exception_classes = []

@@ -28,11 +28,11 @@ module LogjamAgent
       env_name      = env["logjam_agent.environment_name"] || LogjamAgent.environment_name
       caller_id     = env["HTTP_X_LOGJAM_CALLER_ID"] || ""
       caller_action = env["HTTP_X_LOGJAM_ACTION"] || ""
-      Rails.logger.start_request(app_name, env_name, :caller_id => caller_id, :caller_action => caller_action)
+      LogjamAgent.start_request(app_name, env_name, :caller_id => caller_id, :caller_action => caller_action)
     end
 
     def finish_request(env)
-      Rails.logger.finish_request(env["time_bandits.metrics"])
+      LogjamAgent.finish_request(env["time_bandits.metrics"])
     end
   end
 end

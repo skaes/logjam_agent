@@ -52,6 +52,9 @@ module LogjamAgent
 
     attr_accessor :formatter
 
+    # for backwards compatibility. needs to go away.
+    include LogjamAgent::RequestHandling
+
     def initialize(*args)
       super(*args)
       # stupid bug in the buffered logger code (Rails::VERSION::STRING < "3.2")
@@ -59,32 +62,12 @@ module LogjamAgent
       @formatter = lambda{|_, _, _, message| message}
     end
 
-    def request
-      Thread.current.thread_variable_get(:logjam_request)
-    end
-
-    def request=(request)
-      Thread.current.thread_variable_set(:logjam_request, request)
-    end
-
-    def start_request(app, env, initial_fields={})
-      self.request = Request.new(app, env, self, initial_fields)
-    end
-
-    def finish_request(additional_fields={})
-      if request = self.request
-        request.fields.merge!(additional_fields)
-        self.request = nil
-        request.forward
-      end
-    end
-
     def add(severity, message = nil, progname = nil, tags_text = nil, &block)
       return if level > severity
       message = progname if message.nil?
       progname = nil
       message ||= block.call || '' if block
-      request = self.request
+      request = LogjamAgent.request
       if message.is_a?(Exception)
         request.add_exception(message.class.to_s) if request
         message = format_exception(message)

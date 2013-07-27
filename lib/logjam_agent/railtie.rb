@@ -19,10 +19,12 @@ module LogjamAgent
           logger.formatter = LogjamAgent::SyslogLikeFormatter.new
           logger.auto_flushing = false if Rails.env.production? && Rails::VERSION::STRING < "3.2"
           logger = ActiveSupport::TaggedLogging.new(logger) if Rails::VERSION::STRING >= "3.2"
+          LogjamAgent.logger = logger
           logger
         rescue StandardError
           logger = LogjamAgent::BufferedLogger.new(STDERR)
           logger = ActiveSupport::TaggedLogging.new(logger) if Rails::VERSION::STRING >= "3.2"
+          LogjamAgent.logger = logger
           logger.level = ::Logger::WARN
           logger.warn(
                       "Logging Error: Unable to access log file. Please ensure that #{path} exists and is writable. " +
@@ -53,6 +55,7 @@ module LogjamAgent
         end
       EVA
     end
+
   end
 end
 

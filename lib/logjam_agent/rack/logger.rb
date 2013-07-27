@@ -35,7 +35,7 @@ module LogjamAgent
         @taggers.collect do |tag|
           case tag
           when :uuid
-            Rails.logger.request.uuid
+            LogjamAgent.request.uuid
           when Proc
             tag.call(request)
           when Symbol
@@ -52,7 +52,7 @@ module LogjamAgent
 
         path = request.filtered_path
 
-        logjam_fields = Rails.logger.request.fields
+        logjam_fields = LogjamAgent.request.fields
         logjam_fields.merge!(:started_at => start_time.iso8601, :ip => request.remote_ip, :host => @hostname)
         logjam_fields.merge!(extract_request_info(request))
 
@@ -77,7 +77,7 @@ module LogjamAgent
 
         ActiveSupport::LogSubscriber.flush_all!
 
-        Rails.logger.request.fields.merge!(request_info)
+        LogjamAgent.request.fields.merge!(request_info)
 
         env["time_bandits.metrics"] = TimeBandits.metrics
       end
@@ -163,7 +163,7 @@ module ActionController #:nodoc:
         full_name = "#{controller}##{action}"
         action_name = LogjamAgent.action_name_proc.call(full_name)
 
-        Rails.logger.request.fields[:action] = action_name
+        LogjamAgent.request.fields[:action] = action_name
 
         info "  Processing by #{full_name} as #{payload[:formats].first.to_s.upcase}"
         info "  Parameters: #{params.inspect}" unless params.empty?
@@ -182,7 +182,7 @@ module ActionController #:nodoc:
         full_name = "#{controller}##{action}"
         action_name = LogjamAgent.action_name_proc.call(full_name)
 
-        Rails.logger.request.fields[:action] = action_name
+        LogjamAgent.request.fields[:action] = action_name
 
         info "  Processing by #{full_name} as #{format}"
         info "  Parameters: #{params.inspect}" unless params.empty?
@@ -201,7 +201,7 @@ module ActionController #:nodoc:
         full_name = "#{controller}##{action}"
         action_name = LogjamAgent.action_name_proc.call(full_name)
 
-        Rails.logger.request.fields[:action] = action_name
+        LogjamAgent.request.fields[:action] = action_name
 
         info "Processing by #{full_name} as #{format}"
         info "  Parameters: #{params.inspect}" unless params.empty?
