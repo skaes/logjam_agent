@@ -12,7 +12,10 @@ module LogjamAgent
       Thread.current.thread_variable_set(:logjam_request, request)
     end
 
-    def start_request(app = LogjamAgent.application_name, env = LogjamAgent.environment_name, initial_fields = {})
+    def start_request(*args)
+      initial_fields = args.extract_options!
+      app = args[0] || LogjamAgent.application_name
+      env = args[1] || LogjamAgent.environment_name
       self.request = Request.new(app, env, initial_fields)
     end
 
