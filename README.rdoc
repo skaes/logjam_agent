@@ -3,6 +3,6 @@
 Client side library for logjam.
 
 Provides a customized logger, which logs lines and sends combined request information via
-AMQP to logjam.
+AMQP or ZeroMQ to logjam.
 
 
