@@ -10,6 +10,7 @@ module LogjamAgent
       @env = env
       @config = default_options(app, env).merge!(opts)
       @exchange = @bunny = nil
+      ensure_bunny_gem_is_available
     end
 
     def default_options(app, env)
@@ -88,12 +89,11 @@ module LogjamAgent
 
     #TODO: verify socket_timout for ruby 1.9
     def bunny
-      @bunny ||=
-        begin
-          require "bunny" unless defined?(Bunny)
-          Bunny.new(:host => @config[:host], :socket_timeout => 1.0)
-        end
+      @bunny ||= Bunny.new(:host => @config[:host], :socket_timeout => 1.0)
     end
 
+    def ensure_bunny_gem_is_available
+      require "bunny" unless defined?(Bunny)
+    end
   end
 end
