@@ -22,5 +22,5 @@ Gem::Specification.new do |s|
   s.add_development_dependency "i18n"
 
   s.add_runtime_dependency "activesupport"
-  s.add_runtime_dependency "time_bandits", [">= 0.4"]
+  s.add_runtime_dependency "time_bandits", [">= 0.6.0"]
 end
