@@ -1,5 +1,4 @@
 require "socket"
-require "uuid4r"
 require "time_bandits"
 
 module LogjamAgent
@@ -117,6 +116,18 @@ module LogjamAgent
         ::LogjamAgent.reset_exception_matcher
       end
     EOS
+  end
+
+  # setup uuid generation
+  begin
+    require "uuid4r"
+    def self.generate_uuid
+      UUID4R::uuid(1).gsub('-','')
+    end
+  rescue LoadError
+    def self.generate_uuid
+      SecureRandom.uuid.gsub('-','')
+    end
   end
 
   # setup json encoding

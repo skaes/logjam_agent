@@ -13,7 +13,7 @@ module LogjamAgent
       @env = env
       @forwarder = Forwarders.get(app, env)
       @lines = []
-      @uuid = UUID4R::uuid(1).gsub('-','')
+      @uuid = LogjamAgent.generate_uuid
       @fields = initial_fields.merge(:request_id => @uuid, :host => LogjamAgent.hostname, :process_id => Process.pid, :lines => @lines)
       @mutex = Mutex.new
     end
