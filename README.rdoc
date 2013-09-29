@@ -1,8 +1,0 @@
-== Logjam Agent
-
-Client side library for logjam.
-
-Provides a customized logger, which logs lines and sends combined request information via
-AMQP or ZeroMQ to logjam.
-
-
