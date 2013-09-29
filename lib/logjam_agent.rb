@@ -114,6 +114,7 @@ module LogjamAgent
   end
 
   def self.auto_detect_logged_exceptions
+    return if @_exception_auto_detection_initialized
     determine_loaded_exception_classes
     Exception.class_eval <<-"EOS"
       def self.inherited(subclass)
@@ -121,6 +122,7 @@ module LogjamAgent
         ::LogjamAgent.reset_exception_matcher
       end
     EOS
+    @_exception_auto_detection_initialized = true
   end
 
   # setup uuid generation
