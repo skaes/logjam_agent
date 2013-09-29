@@ -56,7 +56,6 @@ module LogjamAgent
         logjam_fields.merge!(:started_at => start_time.iso8601, :ip => request.remote_ip, :host => @hostname)
         logjam_fields.merge!(extract_request_info(request))
 
-        debug ""
         info "Started #{request.request_method} \"#{path}\" for #{request.ip} at #{start_time.to_default_s}"
       end
 
