@@ -11,13 +11,16 @@ Currently two alternate mechanisms are available for data transport: AMQP or Zer
 
 For AMQP, add
 
-    gem "logjam_agent"
-    gem "bunny"
-
+```ruby
+gem "logjam_agent"
+gem "bunny"
+```
 For ZeroMQ, add
 
-    gem "logjam_agent"
-    gem "ffi-rzmq"
+```ruby
+gem "logjam_agent"
+gem "ffi-rzmq"
+```
 
 to your Gemfile.
 
@@ -25,7 +28,7 @@ Add an initializer
     config/initializers/logjam_agent.rb
 to your app and configure class LogjamAgent.
 
-````ruby
+```ruby
 module LogjamAgent
   # Configure the application name (required). Must not contain dots of hyphens.
   self.application_name = "myapp"
@@ -45,7 +48,7 @@ module LogjamAgent
   # Configure cookie obfuscation. Defaults to [/_session\z/].
   # self.obfuscated_cookies = [/_session\z/]
 end
-````
+```
 
 ## Troubleshooting
 
@@ -54,7 +57,9 @@ If the agent experiences problems when sending data, it will log information to 
 
 This behavior is customizable via a module level call back method:
 
-    LogjamAgent.error_handler = lambda {|exception| ... }
+```ruby
+LogjamAgent.error_handler = lambda {|exception| ... }
+```
 
 # License
 
