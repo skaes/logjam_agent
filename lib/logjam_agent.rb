@@ -152,6 +152,14 @@ module LogjamAgent
     forwarder.forward(encode_payload(fields), :routing_key => events_routing_key)
   end
 
+  def self.add_forwarder(type, *args)
+    case type
+    when :zmq then Forwarders.add(ZMQForwarder.new(*args))
+    when :amqp then Forwarders.add(AMQPForwarder.new(*args))
+    else raise ArgumentError.new("unkown logjam transport: '#{type}'")
+    end
+  end
+
   private
 
   def self.events_routing_key
