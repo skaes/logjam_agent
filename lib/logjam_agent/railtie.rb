@@ -8,12 +8,15 @@ module LogjamAgent
   autoload :Middleware, 'logjam_agent/middleware'
 
   class Railtie < Rails::Railtie
+    def logjam_log_path(app)
+      paths = app.config.paths
+      (Rails::VERSION::STRING < "3.1" ? paths.log.to_a : paths['log']).first.to_s
+    end
 
     initializer "initialize_logjam_agent_logger", :before => :initialize_logger do |app|
       Rails.logger ||= app.config.logger ||
         begin
-          paths = app.config.paths
-          path = (Rails::VERSION::STRING < "3.1" ? paths.log.to_a : paths['log']).first.to_s
+          path = logjam_log_path(app)
           logger = LogjamAgent::BufferedLogger.new(path)
           logger.level = ::Logger.const_get(app.config.log_level.to_s.upcase)
           logger.formatter = LogjamAgent::SyslogLikeFormatter.new
@@ -38,8 +41,16 @@ module LogjamAgent
     end
 
     initializer "logjam_agent", :after => "time_bandits" do |app|
+      LogjamAgent.environment_name = Rails.env
       app.config.middleware.swap("TimeBandits::Rack::Logger", "LogjamAgent::Rack::Logger")
       app.config.middleware.insert_before("LogjamAgent::Rack::Logger", "LogjamAgent::Middleware")
+
+      # install a default error handler for forwarding errors
+      log_dir = File.dirname(logjam_log_path(app))
+      forwarding_error_logger = ::Logger.new("#{log_dir}/logjam_agent_error.log")
+      forwarding_error_logger.level = ::Logger::ERROR
+      forwarding_error_logger.formatter = ::Logger::Formatter.new
+      LogjamAgent.forwarding_error_logger = forwarding_error_logger
 
       # patch controller testing to create a logjam request, because middlewares aren't executed
       if Rails.env.test?
@@ -58,7 +69,7 @@ module LogjamAgent
       end
     end
 
-    # make
+    # avoid garbled tempfile information in the logs
     ActiveSupport.on_load(:action_controller) do
       ActionDispatch::Http::UploadedFile.class_eval <<-"EVA"
         def to_hash

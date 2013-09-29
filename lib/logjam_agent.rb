@@ -47,8 +47,13 @@ module LogjamAgent
   mattr_accessor :logger
   self.logger = nil
 
+  mattr_accessor :forwarding_error_logger
+  self.forwarding_error_logger = nil
+
   mattr_accessor :error_handler
-  self.error_handler = lambda { |exception| }
+  self.error_handler = lambda do |exception|
+    forwarding_error_logger.error "#{exception.class.name}: #{exception.message}" if forwarding_error_logger
+  end
 
   mattr_accessor :application_name
   self.application_name = nil
