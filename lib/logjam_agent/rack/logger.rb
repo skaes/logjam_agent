@@ -118,6 +118,7 @@ module LogjamAgent
 
       REFERER = 'HTTP_REFERER'
       CONTENT_LENGTH = 'CONTENT_LENGTH'
+      COOKIE = 'HTTP_COOKIE'
 
       KV_RE   = '[^&;=]+'
       PAIR_RE = %r{(#{KV_RE})=(#{KV_RE})}
@@ -130,6 +131,12 @@ module LogjamAgent
         if referer = headers[REFERER]
           headers[REFERER] = referer.gsub(PAIR_RE) do |_|
             filter.filter([[$1, $2]]).first.join("=")
+          end
+        end
+
+        if cookie = headers[COOKIE]
+          headers[COOKIE] = cookie.gsub(PAIR_RE) do |_|
+            LogjamAgent.cookie_obfuscator.filter([[$1, $2]]).first.join("=")
           end
         end
 

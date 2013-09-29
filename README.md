@@ -41,6 +41,9 @@ to your app and configure class LogjamAgent.
 
       # Configure ip obfuscation. Defaults to no obfuscation.
       self.obfuscate_ips = true
+
+      # Configure cookie obfuscation. Defaults to [/_session\z/].
+      # self.obfuscated_cookies = [/_session\z/]
     end
 ````
 

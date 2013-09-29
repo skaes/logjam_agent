@@ -95,6 +95,13 @@ module LogjamAgent
     obfuscate_ips ? ip.to_s.sub(/\d+\z/, 'XXX') : ip
   end
 
+  mattr_accessor :obfuscated_cookies
+  self.obfuscated_cookies = [/_session\z/]
+
+  def self.cookie_obfuscator
+    @cookie_obfuscator ||= ActionDispatch::Http::ParameterFilter.new(obfuscated_cookies)
+  end
+
   extend RequestHandling
 
   mattr_accessor :exception_classes
