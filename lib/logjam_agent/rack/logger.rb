@@ -53,10 +53,11 @@ module LogjamAgent
         path = request.filtered_path
 
         logjam_fields = LogjamAgent.request.fields
-        logjam_fields.merge!(:started_at => start_time.iso8601, :ip => request.remote_ip, :host => @hostname)
+        ip = LogjamAgent.ip_fuscator(request.remote_ip)
+        logjam_fields.merge!(:started_at => start_time.iso8601, :ip => ip, :host => @hostname)
         logjam_fields.merge!(extract_request_info(request))
 
-        info "Started #{request.request_method} \"#{path}\" for #{request.ip} at #{start_time.to_default_s}"
+        info "Started #{request.request_method} \"#{path}\" for #{ip} at #{start_time.to_default_s}"
       end
 
       def after_dispatch(env, result, run_time_ms)

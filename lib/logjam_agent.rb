@@ -87,6 +87,14 @@ module LogjamAgent
   mattr_accessor :disabled
   self.disabled = false
 
+  mattr_accessor :obfuscate_ips
+  self.obfuscate_ips = false
+
+  # TODO: ipv6 obfuscation
+  def self.ip_fuscator(ip)
+    obfuscate_ips ? ip.to_s.sub(/\d+\z/, 'XXX') : ip
+  end
+
   extend RequestHandling
 
   mattr_accessor :exception_classes

@@ -38,6 +38,9 @@ to your app and configure class LogjamAgent.
 
       # Configure request data forwarder for ZeroMQ.
       # add_forwarder(:amqp, :host => "message.broker.at.your.org"))
+
+      # Configure ip obfuscation. Defaults to no obfuscation.
+      self.obfuscate_ips = true
     end
 ````
 
