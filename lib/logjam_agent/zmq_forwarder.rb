@@ -2,10 +2,11 @@ module LogjamAgent
   class ZMQForwarder
     attr_reader :app, :env
 
-    def initialize(app, env, opts = {})
-      @app = app
-      @env = env
-      @config = default_options(app, env).merge!(opts)
+    def initialize(*args)
+      opts = args.extract_options!
+      @app = args[0] || LogjamAgent.application_name
+      @env = args[1] || LogjamAgent.environment_name
+      @config = default_options(@app, @env).merge!(opts)
       @exchange = @config[:exchange]
       @zmq_hosts = Array(@config[:host])
       @zmq_port = @config[:port]
