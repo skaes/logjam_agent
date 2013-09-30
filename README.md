@@ -24,13 +24,12 @@ gem "ffi-rzmq"
 
 to your Gemfile.
 
-Add an initializer
-    config/initializers/logjam_agent.rb
-to your app and configure class LogjamAgent.
+Add an initializer `config/initializers/logjam_agent.rb` to your app
+and configure class `LogjamAgent`.
 
 ```ruby
 module LogjamAgent
-  # Configure the application name (required). Must not contain dots of hyphens.
+  # Configure the application name (required). Must not contain dots or hyphens.
   self.application_name = "myapp"
 
   # Configure the environment name (optional). Defaults to Rails.env.
@@ -53,7 +52,7 @@ end
 ## Troubleshooting
 
 If the agent experiences problems when sending data, it will log information to a file named
-`logjam_agent_error_log` which you can find under `Rails.root/log`.
+`logjam_agent_error.log` which you can find under `Rails.root/log`.
 
 This behavior is customizable via a module level call back method:
 
