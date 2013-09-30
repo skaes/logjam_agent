@@ -134,7 +134,7 @@ module LogjamAgent
           end
         end
 
-        if cookie = headers[COOKIE]
+        if (cookie = headers[COOKIE]) && LogjamAgent.obfuscated_cookies.present?
           headers[COOKIE] = cookie.gsub(PAIR_RE) do |_|
             LogjamAgent.cookie_obfuscator.filter([[$1, $2]]).first.join("=")
           end
