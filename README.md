@@ -49,6 +49,19 @@ module LogjamAgent
 end
 ```
 
+### Generating unique request ids
+
+The agent generates unique request ids for request handled. It will
+[uuid4r]{https://github.com/skaes/uuid4r} if this is avalaibale in the
+application. Otherwise it will fall back to use the standard
+SecureRandom class shipped with Ruby.
+
+### Generating JSON
+
+The agent will try to use the [Oj]{https://github.com/ohler55/oj} to
+generate JSON. If this is not available in your application, it will
+fall back to the `to_json` method.
+
 ## Troubleshooting
 
 If the agent experiences problems when sending data, it will log information to a file named
