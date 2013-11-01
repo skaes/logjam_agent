@@ -69,6 +69,38 @@ module LogjamAgent
           end
         end
       end
+
+      # patch rack so that the ip method returns the same result as rails remote_ip (modulo exceptions)
+      app.config.after_initialize do
+        if app.config.action_dispatch.trusted_proxies
+          trusted_proxies = /^127\.0\.0\.1$|^(10|172\.(1[6-9]|2[0-9]|30|31)|192\.168)\.|^::1$|^fd[0-9a-f]{2}:.+|^localhost$/i
+          trusted_proxies = Regexp.union(trusted_proxies, app.config.action_dispatch.trusted_proxies)
+          ::Rack::Request.class_eval <<-"EVA"
+            def trusted_proxy?(ip)
+              ip =~ #{trusted_proxies.inspect}
+            end
+          EVA
+        end
+
+        ::Rack::Request.class_eval <<-EVA
+          def ip
+            remote_addrs = @env['REMOTE_ADDR'] ? @env['REMOTE_ADDR'].split(/[,\s]+/) : []
+            remote_addrs.reject! { |addr| trusted_proxy?(addr) }
+
+            return remote_addrs.first if remote_addrs.any?
+
+            forwarded_ips = @env['HTTP_X_FORWARDED_FOR'] ? @env['HTTP_X_FORWARDED_FOR'].strip.split(/[,\s]+/) : []
+
+            if client_ip = @env['HTTP_TRUE_CLIENT_IP'] || @env['HTTP_CLIENT_IP']
+              # If forwarded_ips doesn't include the client_ip, it might be an
+              # ip spoofing attempt, so we ignore HTTP_CLIENT_IP
+              return client_ip if forwarded_ips.include?(client_ip)
+            end
+
+            return forwarded_ips.reject { |ip| trusted_proxy?(ip) }.last || @env["REMOTE_ADDR"]
+          end
+        EVA
+      end
     end
 
     # avoid garbled tempfile information in the logs

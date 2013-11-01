@@ -53,7 +53,7 @@ module LogjamAgent
         path = request.filtered_path
 
         logjam_fields = LogjamAgent.request.fields
-        ip = LogjamAgent.ip_fuscator(request.remote_ip)
+        ip = LogjamAgent.ip_fuscator(request.ip)
         logjam_fields.merge!(:started_at => start_time.iso8601, :ip => ip, :host => @hostname)
         logjam_fields.merge!(extract_request_info(request))
 
