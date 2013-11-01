@@ -91,7 +91,7 @@ module LogjamAgent
   self.obfuscate_ips = false
 
   # TODO: ipv6 obfuscation
-  def self.ip_fuscator(ip)
+  def self.ip_obfuscator(ip)
     obfuscate_ips ? ip.to_s.sub(/\d+\z/, 'XXX') : ip
   end
 
