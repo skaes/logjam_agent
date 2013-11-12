@@ -54,6 +54,9 @@ module LogjamAgent
       forwarding_error_logger.formatter = ::Logger::Formatter.new
       LogjamAgent.forwarding_error_logger = forwarding_error_logger
 
+      # ignore asset requests in development
+      LogjamAgent.ignore_asset_requests = Rails.env.development?
+
       # patch controller testing to create a logjam request, because middlewares aren't executed
       if Rails.env.test?
         ActiveSupport.on_load(:action_controller) do

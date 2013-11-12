@@ -110,6 +110,9 @@ module LogjamAgent
   mattr_accessor :exception_matcher
   self.exception_matcher = nil
 
+  mattr_accessor :ignore_asset_requests
+  self.ignore_asset_requests = false
+
   def self.auto_detect_exception(exception_class)
     # ignore Exception classes created with Class.new (timeout.rb, my old friend)
     if (class_name = exception_class.to_s) =~ /^[\w:]+$/

@@ -16,6 +16,15 @@ module LogjamAgent
       @uuid = LogjamAgent.generate_uuid
       @fields = initial_fields.merge(:request_id => @uuid, :host => LogjamAgent.hostname, :process_id => Process.pid, :lines => @lines)
       @mutex = Mutex.new
+      @ignored = false
+    end
+
+    def ignore!
+      @ignored = true
+    end
+
+    def ignored?
+      @ignored
     end
 
     def id
@@ -47,6 +56,7 @@ module LogjamAgent
     end
 
     def forward
+      return if @ignored
       engine = @fields.delete(:engine)
       # puts @fields.inspect
       @forwarder.forward(LogjamAgent.encode_payload(@fields), :engine => engine)

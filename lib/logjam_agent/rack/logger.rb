@@ -8,6 +8,8 @@ module LogjamAgent
         @app = app
         @taggers = taggers || Rails.application.config.log_tags || []
         @hostname = LogjamAgent.hostname
+        @asset_prefix = Rails.application.config.assets.prefix rescue "---"
+        @ignore_asset_requests = LogjamAgent.ignore_asset_requests
       end
 
       def call(env)
@@ -46,18 +48,27 @@ module LogjamAgent
         end
       end
 
+      def ignored_asset_request?(path)
+        @ignore_asset_requests && path.starts_with?(@asset_prefix)
+      rescue
+        false
+      end
+
       def before_dispatch(request, env, start_time)
         TimeBandits.reset
         Thread.current.thread_variable_set(:time_bandits_completed_info, nil)
 
         path = request.filtered_path
 
-        logjam_fields = LogjamAgent.request.fields
+        logjam_request = LogjamAgent.request
+        logjam_request.ignore! if ignored_asset_request?(path)
+
+        logjam_fields = logjam_request.fields
         ip = LogjamAgent.ip_obfuscator(request.ip)
         logjam_fields.merge!(:started_at => start_time.iso8601, :ip => ip, :host => @hostname)
         logjam_fields.merge!(extract_request_info(request))
 
-        info "Started #{request.request_method} \"#{path}\" for #{ip} at #{start_time.to_default_s}"
+        info "Started #{request.request_method} \"#{path}\" for #{ip} at #{start_time.to_default_s}" unless logjam_request.ignored?
       end
 
       def after_dispatch(env, result, run_time_ms)
@@ -66,6 +77,7 @@ module LogjamAgent
           _, additions, view_time, _ = completed_info
         end
         request_info = {:total_time => run_time_ms, :code => status, :view_time => view_time || 0.0}
+        logjam_request = LogjamAgent.request
 
         if (allowed_time_ms = env['HTTP_X_LOGJAM_CALLER_TIMEOUT'].to_i) > 0 && (run_time_ms > allowed_time_ms)
           warn LogjamAgent::CallerTimeoutExceeded.new("exceeded allowed time by #{(run_time_ms.to_i - allowed_time_ms)} ms")
@@ -73,11 +85,11 @@ module LogjamAgent
 
         message = "Completed #{status} #{::Rack::Utils::HTTP_STATUS_CODES[status]} in %.1fms" % run_time_ms
         message << " (#{additions.join(' | ')})" unless additions.blank?
-        info message
+        info message unless logjam_request.ignored?
 
         ActiveSupport::LogSubscriber.flush_all!
 
-        LogjamAgent.request.fields.merge!(request_info)
+        logjam_request.fields.merge!(request_info)
 
         env["time_bandits.metrics"] = TimeBandits.metrics
       end
