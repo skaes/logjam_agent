@@ -113,6 +113,13 @@ module LogjamAgent
   mattr_accessor :ignore_asset_requests
   self.ignore_asset_requests = false
 
+  mattr_accessor :log_device_ignored_lines
+  self.log_device_ignored_lines = nil
+
+  def self.log_to_log_device?(msg)
+    !(log_device_ignored_lines && msg =~ log_device_ignored_lines)
+  end
+
   def self.auto_detect_exception(exception_class)
     # ignore Exception classes created with Class.new (timeout.rb, my old friend)
     if (class_name = exception_class.to_s) =~ /^[\w:]+$/

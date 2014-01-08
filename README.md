@@ -51,6 +51,10 @@ module LogjamAgent
   # asset requests in development mode. Set this to false if you need
   # to debug asset request handling.
   # self.ignore_asset_requests = Rails.env.development?
+
+  # Configure lines which will not be logged locally.
+  # They will still be sent to the logjam server. Defaults to nil.
+  # self.log_device_ignored_lines = /^\s*Rendered/
 end
 ```
 

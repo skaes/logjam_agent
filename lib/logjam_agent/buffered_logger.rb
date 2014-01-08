@@ -77,16 +77,19 @@ module LogjamAgent
           request.add_exception(e)
         end
       end
+      log_to_log_device = level > Logger::INFO || LogjamAgent.log_to_log_device?(message)
       message = "#{tags_text}#{message}" unless tags_text.blank?
       time = Time.now
-      formatted_message = formatter.call(severity, time, progname, message)
-      if respond_to?(:buffer)
-        buffer <<  formatted_message << "\n"
-        auto_flush
-      elsif @log # @log is a logger (or nil for rails 4)
-        @log << "#{formatted_message}\n"
-      elsif @logdev
-        @logdev.write(formatted_message)
+      if log_to_log_device
+        formatted_message = formatter.call(severity, time, progname, message)
+        if respond_to?(:buffer)
+          buffer <<  formatted_message << "\n"
+          auto_flush
+        elsif @log # @log is a logger (or nil for rails 4)
+          @log << "#{formatted_message}\n"
+        elsif @logdev
+          @logdev.write(formatted_message)
+        end
       end
       request.add_line(severity, time, message) if request
       message
