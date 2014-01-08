@@ -118,6 +118,8 @@ module LogjamAgent
 
   def self.log_to_log_device?(msg)
     !(log_device_ignored_lines && msg =~ log_device_ignored_lines)
+  rescue
+    true
   end
 
   def self.auto_detect_exception(exception_class)
