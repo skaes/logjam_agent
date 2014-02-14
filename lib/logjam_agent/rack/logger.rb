@@ -26,11 +26,20 @@ module LogjamAgent
 
       def call_app(request, env)
         start_time = Time.now
+        start_time_header = env['HTTP_X_STARTTIME'] # || "t=#{((Time.now - 50.0/1_000.0).to_f*1_000_000).to_i}"
+        if start_time_header && start_time_header =~ /\At=(\d+)\z/
+          # accuracy?
+          http_start_time = Time.at($1.to_f / 1_000_000.0)
+          wait_time_ms = (start_time - http_start_time) * 1000
+          start_time = http_start_time
+        else
+          wait_time_ms = 0.0
+        end
         before_dispatch(request, env, start_time)
         result = @app.call(env)
       ensure
-        run_time = Time.now - start_time
-        after_dispatch(env, result, run_time*1000)
+        run_time_ms = (Time.now - start_time) * 1000
+        after_dispatch(env, result, run_time_ms, wait_time_ms)
       end
 
       def compute_tags(request)
@@ -71,12 +80,14 @@ module LogjamAgent
         info "Started #{request.request_method} \"#{path}\" for #{ip} at #{start_time.to_default_s}" unless logjam_request.ignored?
       end
 
-      def after_dispatch(env, result, run_time_ms)
+      def after_dispatch(env, result, run_time_ms, wait_time_ms)
         status = result ? result.first.to_i : 500
         if completed_info = Thread.current.thread_variable_get(:time_bandits_completed_info)
           _, additions, view_time, _ = completed_info
         end
-        request_info = {:total_time => run_time_ms, :code => status, :view_time => view_time || 0.0}
+        request_info = {
+          :total_time => run_time_ms, :code => status, :view_time => view_time || 0.0, :wait_time => wait_time_ms
+        }
         logjam_request = LogjamAgent.request
 
         if (allowed_time_ms = env['HTTP_X_LOGJAM_CALLER_TIMEOUT'].to_i) > 0 && (run_time_ms > allowed_time_ms)
