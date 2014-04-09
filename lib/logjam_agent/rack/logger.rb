@@ -218,7 +218,7 @@ module ActionController #:nodoc:
         info "  Parameters: #{params.inspect}" unless params.empty?
       end
 
-    elsif Rails::VERSION::STRING =~ /\A(3\.2|4\.0)/
+    elsif Rails::VERSION::STRING =~ /\A(3\.2|4\.0|4\.1)/
 
       def start_processing(event)
         payload = event.payload
