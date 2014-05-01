@@ -220,6 +220,12 @@ module ActionController #:nodoc:
 
     elsif Rails::VERSION::STRING =~ /\A(3\.2|4\.0|4\.1)/
 
+      # Rails 4.1 uses method_added to automatically subscribe newly
+      # added methods. Since start_processing is already defined, the
+      # net effect is that start_processing gets called
+      # twice. Therefore, we temporarily switch to protected mode and
+      # change it back later to public.
+      protected
       def start_processing(event)
         payload = event.payload
         params  = payload[:params].except(*INTERNAL_PARAMS)
@@ -236,9 +242,10 @@ module ActionController #:nodoc:
         info "Processing by #{full_name} as #{format}"
         info "  Parameters: #{params.inspect}" unless params.empty?
       end
+      public :start_processing
 
     else
-      raise "loggjam_agent ActionController monkey patch is not compatible with your Rails version"
+      raise "logjam_agent ActionController monkey patch is not compatible with your Rails version"
     end
   end
 
