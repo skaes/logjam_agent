@@ -116,8 +116,11 @@ module LogjamAgent
   mattr_accessor :log_device_ignored_lines
   self.log_device_ignored_lines = nil
 
-  def self.log_to_log_device?(msg)
-    !(log_device_ignored_lines && msg =~ log_device_ignored_lines)
+  mattr_accessor :log_device_level
+  self.log_device_level = Logger::WARN
+
+  def self.log_to_log_device?(severity, msg)
+    severity >= log_device_level && !(log_device_ignored_lines && msg =~ log_device_ignored_lines)
   rescue
     true
   end
