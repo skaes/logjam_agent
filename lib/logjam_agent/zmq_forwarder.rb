@@ -73,7 +73,7 @@ module LogjamAgent
 
     def publish(key, data)
       parts = [@exchange, key, data]
-      if socket.send_strings(parts, ZMQ::NonBlocking) < 0
+      if socket.send_strings(parts, ZMQ::DONTWAIT) < 0
         raise "ZMQ error: #{ZMQ::Util.error_string}"
       end
     end
