@@ -135,7 +135,19 @@ module LogjamAgent
 
   def self.determine_loaded_exception_classes
     ObjectSpace.each_object(Class) do |klass|
-      auto_detect_exception(klass) if klass < Exception
+      begin
+        auto_detect_exception(klass) if klass < Exception
+      rescue ArgumentError
+        # some klazzes do implement 'self.<=>(other)' used by Comparable
+        # returning nil, which is ok from the ruby specs but results in
+        # an error like:
+        #
+        #   ArgumentError: comparison of Class with Class failed
+        #
+        # when comparing it like 'klass < Exception'
+        # [ class A; extend ::Comparable; def self.<=>(o); nil; end; end ]
+        # occured with gem 'axiom'
+      end
     end
     reset_exception_matcher
   end
