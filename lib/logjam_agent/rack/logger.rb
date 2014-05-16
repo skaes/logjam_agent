@@ -1,6 +1,7 @@
 module LogjamAgent
 
   class CallerTimeoutExceeded < StandardError; end
+  class NegativeWaitTime < StandardError; end
 
   module Rack
     class Logger < ActiveSupport::LogSubscriber
@@ -30,8 +31,9 @@ module LogjamAgent
         if start_time_header && start_time_header =~ /\At=(\d+)\z/
           # accuracy?
           http_start_time = Time.at($1.to_f / 1_000_000.0)
-          wait_time_ms = (start_time - http_start_time) * 1000
-          start_time = http_start_time
+          if (wait_time_ms = (start_time - http_start_time) * 1000) > 0
+            start_time = http_start_time
+          end
         else
           wait_time_ms = 0.0
         end
@@ -85,13 +87,15 @@ module LogjamAgent
         if completed_info = Thread.current.thread_variable_get(:time_bandits_completed_info)
           _, additions, view_time, _ = completed_info
         end
-        request_info = {
-          :total_time => run_time_ms, :code => status, :view_time => view_time || 0.0, :wait_time => wait_time_ms
-        }
         logjam_request = LogjamAgent.request
 
         if (allowed_time_ms = env['HTTP_X_LOGJAM_CALLER_TIMEOUT'].to_i) > 0 && (run_time_ms > allowed_time_ms)
           warn LogjamAgent::CallerTimeoutExceeded.new("exceeded allowed time by #{(run_time_ms.to_i - allowed_time_ms)} ms")
+        end
+
+        if wait_time_ms < 0
+          warn LogjamAgent::NegativeWaitTime.new("#{wait_time_ms} ms")
+          wait_time_ms = 0.0
         end
 
         message = "Completed #{status} #{::Rack::Utils::HTTP_STATUS_CODES[status]} in %.1fms" % run_time_ms
@@ -99,7 +103,9 @@ module LogjamAgent
         info message unless logjam_request.ignored?
 
         ActiveSupport::LogSubscriber.flush_all!
-
+        request_info = {
+          :total_time => run_time_ms, :code => status, :view_time => view_time || 0.0, :wait_time => wait_time_ms
+        }
         logjam_request.fields.merge!(request_info)
 
         env["time_bandits.metrics"] = TimeBandits.metrics
