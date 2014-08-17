@@ -116,6 +116,12 @@ module LogjamAgent
   mattr_accessor :log_device_ignored_lines
   self.log_device_ignored_lines = nil
 
+  mattr_accessor :max_line_length
+  self.max_line_length = 2048
+
+  mattr_accessor :max_bytes_all_lines
+  self.max_bytes_all_lines = 1024 * 1024
+
   def self.log_to_log_device?(msg)
     !(log_device_ignored_lines && msg =~ log_device_ignored_lines)
   rescue

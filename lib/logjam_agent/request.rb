@@ -17,6 +17,9 @@ module LogjamAgent
       @fields = initial_fields.merge(:request_id => @uuid, :host => LogjamAgent.hostname, :process_id => Process.pid, :lines => @lines)
       @mutex = Mutex.new
       @ignored = false
+      @bytes_all_lines = 0
+      @max_bytes_all_lines = LogjamAgent.max_bytes_all_lines
+      @max_line_length = LogjamAgent.max_line_length
     end
 
     def ignore!
@@ -44,8 +47,17 @@ module LogjamAgent
     end
 
     def add_line(severity, timestamp, message)
+      return if @bytes_all_lines > @max_bytes_all_lines
+      message = message.strip
+      if message.size > @max_line_length
+        message[(@max_line_length-21)..-1] = " ... [LINE TRUNCATED]"
+      end
       @mutex.synchronize do
-        @lines << [severity, format_time(timestamp), message.strip]
+        if (@bytes_all_lines += message.bytesize) < @max_bytes_all_lines
+          @lines << [severity, format_time(timestamp), message]
+        else
+          @lines << [severity, format_time(timestamp), "... [LINES DROPPED]"]
+        end
       end
     end
 

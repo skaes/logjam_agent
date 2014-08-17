@@ -55,6 +55,14 @@ module LogjamAgent
   # Configure lines which will not be logged locally.
   # They will still be sent to the logjam server. Defaults to nil.
   # self.log_device_ignored_lines = /^\s*Rendered/
+
+  # Configure maximum log line length. Defaults to 2048.
+  # This setting only applies to the lines sent with the request.
+  self.max_line_length = 2048
+
+  # Configure max bytes allowed for all log lines. Defaults to 1Mb.
+  # This setting only applies to the lines sent with the request.
+  self.max_bytes_all_lines = 1024 * 1024
 end
 ```
 
