@@ -49,7 +49,11 @@ module LogjamAgent
 
       # install a default error handler for forwarding errors
       log_dir = File.dirname(logjam_log_path(app))
-      forwarding_error_logger = ::Logger.new("#{log_dir}/logjam_agent_error.log")
+      begin
+        forwarding_error_logger = ::Logger.new("#{log_dir}/logjam_agent_error.log")
+      rescue StandardError
+        forwarding_error_logger = ::Logger.new(STDERR)
+      end
       forwarding_error_logger.level = ::Logger::ERROR
       forwarding_error_logger.formatter = ::Logger::Formatter.new
       LogjamAgent.forwarding_error_logger = forwarding_error_logger
