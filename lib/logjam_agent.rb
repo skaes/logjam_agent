@@ -29,6 +29,7 @@ module LogjamAgent
 end
 
 require "logjam_agent/version"
+require "logjam_agent/util"
 require "logjam_agent/amqp_forwarder"
 require "logjam_agent/zmq_forwarder"
 require "logjam_agent/forwarders"

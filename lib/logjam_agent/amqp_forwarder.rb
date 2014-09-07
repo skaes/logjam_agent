@@ -5,12 +5,15 @@ module LogjamAgent
 
     attr_reader :app, :env
 
+    include LogjamAgent::Util
+
     def initialize(*args)
       opts = args.extract_options!
       @app = args[0] || LogjamAgent.application_name
       @env = args[1] || LogjamAgent.environment_name
       @config = default_options(@app, @env).merge!(opts)
       @exchange = @bunny = nil
+      @sequence = 0
       ensure_bunny_gem_is_available
     end
 
@@ -33,10 +36,11 @@ module LogjamAgent
         if engine = options[:engine]
           key += ".#{engine}"
         end
-        exchange.publish(msg, :key => key, :persistent => false)
-      rescue Exception => exception
+        info = pack_info(@sequence = next_fixnum(@sequence))
+        exchange.publish(msg, :key => key, :persistent => false, :headers => {:info => info})
+      rescue => error
         reraise_expectation_errors!
-        pause(exception)
+        pause(error)
       end
     end
 
@@ -48,7 +52,7 @@ module LogjamAgent
         else
           @bunny.stop
         end
-      rescue Exception
+      rescue
         # if bunny throws an exception here, its not usable anymore anyway
       ensure
         @exchange = @bunny = nil

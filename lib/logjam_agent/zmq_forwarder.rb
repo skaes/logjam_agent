@@ -2,6 +2,8 @@ module LogjamAgent
   class ZMQForwarder
     attr_reader :app, :env
 
+    include Util
+
     def initialize(*args)
       opts = args.extract_options!
       @app = args[0] || LogjamAgent.application_name
@@ -10,6 +12,7 @@ module LogjamAgent
       @app_env = "#{@app}-#{@env}"
       @zmq_hosts = Array(@config[:host])
       @zmq_port = @config[:port]
+      @sequence = 0
     end
 
     def default_options(app, env)
@@ -71,7 +74,8 @@ module LogjamAgent
     end
 
     def publish(key, data)
-      parts = [@app_env, key, data]
+      info = pack_info(@sequence = next_fixnum(@sequence))
+      parts = [@app_env, key, data, info]
       if socket.send_strings(parts, ZMQ::DONTWAIT) < 0
         raise "ZMQ error: #{ZMQ::Util.error_string}"
       end
