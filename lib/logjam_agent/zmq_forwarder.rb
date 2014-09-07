@@ -7,7 +7,7 @@ module LogjamAgent
       @app = args[0] || LogjamAgent.application_name
       @env = args[1] || LogjamAgent.environment_name
       @config = default_options(@app, @env).merge!(opts)
-      @exchange = @config[:exchange]
+      @app_env = "#{@app}-#{@env}"
       @zmq_hosts = Array(@config[:host])
       @zmq_port = @config[:port]
     end
@@ -15,7 +15,6 @@ module LogjamAgent
     def default_options(app, env)
       {
         :host         => "localhost",
-        :exchange     => "request-stream-#{app}-#{env}",
         :routing_key  => "logs.#{app}.#{env}",
         :port         => 12345
       }
@@ -65,14 +64,14 @@ module LogjamAgent
           key += ".#{engine}"
         end
         publish(key, msg)
-      rescue Exception => exception
+      rescue => error
         reraise_expectation_errors!
-        raise ForwardingError.new(exception.message)
+        raise ForwardingError.new(error.message)
       end
     end
 
     def publish(key, data)
-      parts = [@exchange, key, data]
+      parts = [@app_env, key, data]
       if socket.send_strings(parts, ZMQ::DONTWAIT) < 0
         raise "ZMQ error: #{ZMQ::Util.error_string}"
       end
