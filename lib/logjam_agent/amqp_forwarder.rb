@@ -11,19 +11,19 @@ module LogjamAgent
       opts = args.extract_options!
       @app = args[0] || LogjamAgent.application_name
       @env = args[1] || LogjamAgent.environment_name
-      @config = default_options(@app, @env).merge!(opts)
-      @exchange = @bunny = nil
+      @app_env = "#{@app}-#{@env}"
+      @config = default_options.merge!(opts)
+      @exchanges = {}
+      @bunny = nil
       @sequence = 0
       ensure_bunny_gem_is_available
     end
 
-    def default_options(app, env)
+    def default_options
       {
         :host                 => "localhost",
-        :exchange             => "request-stream-#{app}-#{env}",
         :exchange_durable     => true,
         :exchange_auto_delete => false,
-        :routing_key          => "logs.#{app}.#{env}"
       }
     end
 
@@ -31,13 +31,13 @@ module LogjamAgent
     def forward(msg, options = {})
       return if paused? || LogjamAgent.disabled
       begin
-        # $stderr.puts msg
-        key = options[:routing_key] || @config[:routing_key]
+        app_env = options[:app_env] || @app_env
+        key = options[:routing_key] || "logs.#{app_env.sub('-','.')}"
         if engine = options[:engine]
           key += ".#{engine}"
         end
         info = pack_info(@sequence = next_fixnum(@sequence))
-        exchange.publish(msg, :key => key, :persistent => false, :headers => {:info => info})
+        exchange(app_env).publish(msg, :key => key, :persistent => false, :headers => {:info => info})
       rescue => error
         reraise_expectation_errors!
         pause(error)
@@ -55,7 +55,8 @@ module LogjamAgent
       rescue
         # if bunny throws an exception here, its not usable anymore anyway
       ensure
-        @exchange = @bunny = nil
+        @exchanges = {}
+        @bunny = nil
       end
     end
 
@@ -81,11 +82,11 @@ module LogjamAgent
       @paused && @paused > RETRY_AFTER.ago
     end
 
-    def exchange
-      @exchange ||=
+    def exchange(app_env)
+      @exchanges[app_env] ||=
         begin
           bunny.start unless bunny.connected?
-          bunny.exchange(@config[:exchange],
+          bunny.exchange("request-stream-#{app_env}",
                          :durable => @config[:exchange_durable],
                          :auto_delete => @config[:exchange_auto_delete],
                          :type => :topic)

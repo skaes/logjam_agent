@@ -8,17 +8,16 @@ module LogjamAgent
       opts = args.extract_options!
       @app = args[0] || LogjamAgent.application_name
       @env = args[1] || LogjamAgent.environment_name
-      @config = default_options(@app, @env).merge!(opts)
       @app_env = "#{@app}-#{@env}"
+      @config = default_options.merge!(opts)
       @zmq_hosts = Array(@config[:host])
       @zmq_port = @config[:port]
       @sequence = 0
     end
 
-    def default_options(app, env)
+    def default_options
       {
         :host         => "localhost",
-        :routing_key  => "logs.#{app}.#{env}",
         :port         => 12345
       }
     end
@@ -54,7 +53,6 @@ module LogjamAgent
 
     def reset
       return unless @socket
-      # $stderr.puts "closing socket"
       @socket.close
       @socket = nil
     end
@@ -62,20 +60,21 @@ module LogjamAgent
     def forward(msg, options={})
       return if LogjamAgent.disabled
       begin
-        key = options[:routing_key] || @config[:routing_key]
+        app_env = options[:app_env] || @app_env
+        key = options[:routing_key] || "logs.#{app_env.sub('-','.')}"
         if engine = options[:engine]
           key += ".#{engine}"
         end
-        publish(key, msg)
+        publish(app_env, key, msg)
       rescue => error
         reraise_expectation_errors!
         raise ForwardingError.new(error.message)
       end
     end
 
-    def publish(key, data)
+    def publish(app_env, key, data)
       info = pack_info(@sequence = next_fixnum(@sequence))
-      parts = [@app_env, key, data, info]
+      parts = [app_env, key, data, info]
       if socket.send_strings(parts, ZMQ::DONTWAIT) < 0
         raise "ZMQ error: #{ZMQ::Util.error_string}"
       end
