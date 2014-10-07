@@ -49,7 +49,7 @@ module LogjamAgent
     def add_line(severity, timestamp, message)
       return if @bytes_all_lines > @max_bytes_all_lines
       message = message.strip
-      if message.size > @max_line_length
+      if message.size > @max_line_length && severity < Logger::ERROR
         message[(@max_line_length-21)..-1] = " ... [LINE TRUNCATED]"
       end
       @mutex.synchronize do
