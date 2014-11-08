@@ -94,7 +94,7 @@ LogjamAgent.error_handler = lambda {|exception| ... }
 
 The MIT License
 
-Copyright (c) 2013 Stefan Kaes
+Copyright (c) 2013, 2014 Stefan Kaes
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
