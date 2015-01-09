@@ -52,5 +52,9 @@ module LogjamAgent
         @attributes << [name, value]
       end
     end
+
+    def reset_attributes
+      @attributes = []
+    end
   end
 end

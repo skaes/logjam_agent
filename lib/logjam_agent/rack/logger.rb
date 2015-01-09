@@ -66,6 +66,7 @@ module LogjamAgent
       end
 
       def before_dispatch(request, env, start_time)
+        logger.formatter.reset_attributes if logger.formatter.respond_to?(:reset_attributes)
         TimeBandits.reset
         Thread.current.thread_variable_set(:time_bandits_completed_info, nil)
 
