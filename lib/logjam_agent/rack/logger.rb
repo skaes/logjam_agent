@@ -118,7 +118,7 @@ module LogjamAgent
 
         filter = request.send(:parameter_filter)
 
-        request_info[:method] = request.method
+        request_info[:method] = request.method rescue "UnknownwMethod"
         request_info[:url] = request.filtered_path
         request_info[:headers] = extract_headers(request, filter)
 
