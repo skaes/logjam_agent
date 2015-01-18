@@ -27,9 +27,9 @@ module LogjamAgent
 
       def call_app(request, env)
         start_time = Time.now
-        start_time_header = env['HTTP_X_STARTTIME'] # || "t=#{((Time.now - 50.0/1_000.0).to_f*1_000_000).to_i}"
+        start_time_header = env['HTTP_X_STARTTIME']
         if start_time_header && start_time_header =~ /\At=(\d+)\z/
-          # accuracy?
+          # HTTP_X_STARTTIME is microseconds since the epoch (UTC)
           http_start_time = Time.at($1.to_f / 1_000_000.0)
           if (wait_time_ms = (start_time - http_start_time) * 1000) > 0
             start_time = http_start_time
@@ -75,9 +75,10 @@ module LogjamAgent
         logjam_request = LogjamAgent.request
         logjam_request.ignore! if ignored_asset_request?(path)
 
+        logjam_request.start_time = start_time
         logjam_fields = logjam_request.fields
         ip = LogjamAgent.ip_obfuscator(request.ip)
-        logjam_fields.merge!(:started_at => start_time.iso8601, :ip => ip, :host => @hostname)
+        logjam_fields.merge!(:ip => ip, :host => @hostname)
         logjam_fields.merge!(extract_request_info(request))
 
         info "Started #{request.request_method} \"#{path}\" for #{ip} at #{start_time.to_default_s}" unless logjam_request.ignored?

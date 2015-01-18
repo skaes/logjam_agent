@@ -6,7 +6,7 @@ end
 
 module LogjamAgent
   class Request
-    attr_reader :fields, :uuid
+    attr_reader :fields, :uuid, :start_time
 
     def initialize(app, env, initial_fields)
       @app = app
@@ -14,12 +14,22 @@ module LogjamAgent
       @forwarder = Forwarders.get(app, env)
       @lines = []
       @uuid = LogjamAgent.generate_uuid
-      @fields = initial_fields.merge(:request_id => @uuid, :host => LogjamAgent.hostname, :process_id => Process.pid, :lines => @lines)
+      @fields = initial_fields.merge(:request_id => @uuid, :host => LogjamAgent.hostname,
+                                     :process_id => Process.pid, :lines => @lines)
+      if start_time = @fields.delete(:start_time)
+        self.start_time = start_time
+      end
       @mutex = Mutex.new
       @ignored = false
       @bytes_all_lines = 0
       @max_bytes_all_lines = LogjamAgent.max_bytes_all_lines
       @max_line_length = LogjamAgent.max_line_length
+    end
+
+    def start_time=(start_time)
+      @start_time = start_time
+      @fields[:started_at] = start_time.iso8601
+      @fields[:started_ms] = start_time.tv_sec * 1000 + start_time.tv_usec / 1000
     end
 
     def ignore!
