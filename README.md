@@ -39,7 +39,7 @@ module LogjamAgent
   add_forwarder(:zmq, :host => "logjam.instance.at.your.org", :port => 9605)
 
   # Configure request data forwarder for AMQP.
-  # add_forwarder(:amqp, :host => "message.broker.at.your.org"))
+  # add_forwarder(:amqp, :host => "message.broker.at.your.org")
 
   # Configure ip obfuscation. Defaults to no obfuscation.
   self.obfuscate_ips = true
