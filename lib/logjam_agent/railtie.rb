@@ -118,7 +118,8 @@ module LogjamAgent
             :original_filename => original_filename,
             :content_type => content_type,
             :headers => headers,
-            :tempfile => { :path => tempfile.path }
+            :tempfile => { :path => tempfile.path },
+            :size => size
           }
         end
       EVA
