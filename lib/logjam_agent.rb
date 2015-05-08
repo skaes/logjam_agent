@@ -163,7 +163,7 @@ module LogjamAgent
   begin
     require "uuid4r"
     def self.generate_uuid
-      UUID4R::uuid(1).gsub('-','')
+      UUID4R::uuid(4).gsub('-','')
     end
   rescue LoadError
     def self.generate_uuid
