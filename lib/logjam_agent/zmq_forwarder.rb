@@ -58,18 +58,15 @@ module LogjamAgent
     end
 
     def forward(msg, options={})
-      return if LogjamAgent.disabled
-      begin
-        app_env = options[:app_env] || @app_env
-        key = options[:routing_key] || "logs.#{app_env.sub('-','.')}"
-        if engine = options[:engine]
-          key += ".#{engine}"
-        end
-        publish(app_env, key, msg)
-      rescue => error
-        reraise_expectation_errors!
-        raise ForwardingError.new(error.message)
+      app_env = options[:app_env] || @app_env
+      key = options[:routing_key] || "logs.#{app_env.sub('-','.')}"
+      if engine = options[:engine]
+        key += ".#{engine}"
       end
+      publish(app_env, key, msg)
+    rescue => error
+      reraise_expectation_errors!
+      raise ForwardingError.new(error.message)
     end
 
     def publish(app_env, key, data)

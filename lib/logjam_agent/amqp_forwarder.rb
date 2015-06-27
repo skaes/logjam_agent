@@ -29,7 +29,7 @@ module LogjamAgent
 
     # TODO: mutex!
     def forward(msg, options = {})
-      return if paused? || LogjamAgent.disabled
+      return if paused?
       begin
         app_env = options[:app_env] || @app_env
         key = options[:routing_key] || "logs.#{app_env.sub('-','.')}"
