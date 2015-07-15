@@ -95,13 +95,7 @@ module LogjamAgent
 
     #TODO: verify socket_timout for ruby 1.9
     def bunny
-      @bunny ||= Bunny.new(:host => @config[:host],
-                           :socket_timeout => 1.0,
-                           :frame_max => max_frame_size)
-    end
-
-    def max_frame_size
-      (LogjamAgent.max_bytes_all_lines * 1.2).ceil
+      @bunny ||= Bunny.new(:host => @config[:host], :socket_timeout => 1.0)
     end
 
     def ensure_bunny_gem_is_available
