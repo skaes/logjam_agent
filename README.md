@@ -56,6 +56,10 @@ module LogjamAgent
   # They will still be sent to the logjam server. Defaults to nil.
   self.log_device_ignored_lines = /^\s*Rendered/
 
+  # It is also possible to ovveride this on a per request basis,
+  # for example in a Rails before_action
+  # LogjamAgent.request.log_device_ignored_lines = /^\s*(?:Rendered|REDIS)/
+
   # Configure maximum log line length. Defaults to 2048.
   # This setting only applies to the lines sent with the request.
   self.max_line_length = 2048
