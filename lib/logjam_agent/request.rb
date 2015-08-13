@@ -7,6 +7,7 @@ end
 module LogjamAgent
   class Request
     attr_reader :fields, :uuid, :start_time
+    attr_accessor :log_device_ignored_lines
 
     def initialize(app, env, initial_fields)
       @app = app

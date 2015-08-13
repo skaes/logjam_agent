@@ -124,7 +124,11 @@ module LogjamAgent
   self.max_bytes_all_lines = 1024 * 1024
 
   def self.log_to_log_device?(msg)
-    !(log_device_ignored_lines && msg =~ log_device_ignored_lines)
+    if override_global_ignore_lines?
+      msg !~ request.log_device_ignored_lines
+    else
+      !(log_device_ignored_lines && msg =~ log_device_ignored_lines)
+    end
   rescue
     true
   end
@@ -210,4 +214,9 @@ module LogjamAgent
   def self.forwarder
     @forwarder ||= Forwarders.get(application_name, environment_name)
   end
+
+  def self.override_global_ignore_lines?
+    request && request.log_device_ignored_lines
+  end
+
 end
