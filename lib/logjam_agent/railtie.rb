@@ -61,6 +61,8 @@ module LogjamAgent
       # ignore asset requests in development
       LogjamAgent.ignore_asset_requests = Rails.env.development?
 
+      LogjamAgent.application_revision = `git rev-parse HEAD 2>/dev/null`.chomp rescue ""
+
       # patch controller testing to create a logjam request, because middlewares aren't executed
       if Rails.env.test?
         ActiveSupport.on_load(:action_controller) do

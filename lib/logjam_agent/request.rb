@@ -17,6 +17,9 @@ module LogjamAgent
       @uuid = LogjamAgent.generate_uuid
       @fields = initial_fields.merge(:request_id => @uuid, :host => LogjamAgent.hostname,
                                      :process_id => Process.pid, :lines => @lines)
+      unless (revision = LogjamAgent.application_revision).blank?
+        @fields[:revision] = revision
+      end
       if start_time = @fields.delete(:start_time)
         self.start_time = start_time
       end

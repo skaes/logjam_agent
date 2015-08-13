@@ -62,6 +62,9 @@ module LogjamAgent
   mattr_accessor :environment_name
   self.environment_name = nil
 
+  mattr_accessor :application_revision
+  self.application_revision = nil
+
   mattr_accessor :action_name_proc
   self.action_name_proc = lambda{|name| name}
 
