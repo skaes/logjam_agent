@@ -77,7 +77,7 @@ module LogjamAgent
           request.add_exception(e)
         end
       end
-      log_to_log_device = level > Logger::INFO || LogjamAgent.log_to_log_device?(message)
+      log_to_log_device = LogjamAgent.log_to_log_device?(severity, message)
       message = "#{tags_text}#{message}" unless tags_text.blank?
       time = Time.now
       if log_to_log_device

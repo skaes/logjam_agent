@@ -126,7 +126,11 @@ module LogjamAgent
   mattr_accessor :max_bytes_all_lines
   self.max_bytes_all_lines = 1024 * 1024
 
-  def self.log_to_log_device?(msg)
+  mattr_accessor :log_device_level
+  self.log_device_level = Logger::ERROR
+
+  def self.log_to_log_device?(severity, msg)
+    return false if severity < log_device_level
     if override_global_ignore_lines?
       msg !~ request.log_device_ignored_lines
     else
