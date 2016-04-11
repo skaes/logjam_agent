@@ -55,6 +55,14 @@ module LogjamAgent
   # to debug asset request handling.
   self.ignore_asset_requests = Rails.env.development?
 
+  # Configure log level for logging on disk: only lines with a log level
+  # greater than or equal to the specified one will be logged to disk.
+  # Defaults to Logger::INFO. Note that logjam_agent extends the standard
+  # logger log levels by the constant NONE, which indicates no logging.
+  # Also, setting the level has no effect on console logging in development.
+  # self.log_device_log_level = Logger::WARN   # log warnings, errors, fatals and unknown log messages
+  # self.log_device_log_level = Logger::NONE   # log nothing at all
+
   # Configure lines which will not be logged locally.
   # They will still be sent to the logjam server. Defaults to nil.
   self.log_device_ignored_lines = /^\s*Rendered/

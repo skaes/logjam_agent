@@ -41,6 +41,12 @@ if defined?(Rails) && Rails::VERSION::STRING >= "3.0"
   require "logjam_agent/railtie"
 end
 
+# monkey patch log levels to include NONE
+require 'logger'
+module Logger::Severity
+  NONE = UNKNOWN + 1
+end
+
 module LogjamAgent
 
   class ForwardingError < StandardError; end
@@ -126,11 +132,11 @@ module LogjamAgent
   mattr_accessor :max_bytes_all_lines
   self.max_bytes_all_lines = 1024 * 1024
 
-  mattr_accessor :log_device_level
-  self.log_device_level = Logger::ERROR
+  mattr_accessor :log_device_log_level
+  self.log_device_log_level = Logger::INFO
 
   def self.log_to_log_device?(severity, msg)
-    return false if severity < log_device_level
+    return false if severity < log_device_log_level
     if override_global_ignore_lines?
       msg !~ request.log_device_ignored_lines
     else

@@ -19,6 +19,7 @@ module LogjamAgent
           path = logjam_log_path(app)
           logger = LogjamAgent::BufferedLogger.new(path)
           logger.level = ::Logger.const_get(app.config.log_level.to_s.upcase)
+          LogjamAgent.log_device_log_level = logger.level
           logger.formatter = LogjamAgent::SyslogLikeFormatter.new
           logger.auto_flushing = false if Rails.env.production? && Rails::VERSION::STRING < "3.2"
           logger = ActiveSupport::TaggedLogging.new(logger) if Rails::VERSION::STRING >= "3.2"
