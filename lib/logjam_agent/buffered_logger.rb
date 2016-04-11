@@ -95,6 +95,18 @@ module LogjamAgent
       message
     end
 
+    def logdev
+      if respond_to?(:buffer)
+        buffer
+      elsif @log
+        @log
+      elsif @logdev
+        @logdev
+      else
+        raise "no logdev defined"
+      end
+    end
+
     def logdev=(log_device)
       raise "cannot connect logger to new log device" unless log_device.respond_to?(:write)
       if respond_to?(:buffer)

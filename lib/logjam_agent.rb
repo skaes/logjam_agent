@@ -36,6 +36,7 @@ require "logjam_agent/forwarders"
 require "logjam_agent/request"
 require "logjam_agent/buffered_logger"
 require "logjam_agent/syslog_like_formatter"
+require "logjam_agent/graceful_reload"
 
 if defined?(Rails) && Rails::VERSION::STRING >= "3.0"
   require "logjam_agent/railtie"
