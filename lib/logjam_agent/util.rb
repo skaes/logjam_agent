@@ -43,19 +43,19 @@ module LogjamAgent
     end
 
     def pack_info(n)
-      info = [META_INFO_TAG, META_INFO_VERSION, META_INFO_DEVICE_NUMBER].pack("nnN")
+      info = [META_INFO_TAG, LogjamAgent.compression_method, META_INFO_VERSION, META_INFO_DEVICE_NUMBER].pack("nCCN")
       info << pack_uint64_big_endian(zclock_time)
       info << pack_uint64_big_endian(n)
     end
 
     def unpack_info(info)
-      tag, version, device = info[0..7].unpack("nnN")
+      tag, compression_method, version, device = info[0..7].unpack("nCCN")
       zclock = unpack_uint64_big_endian(info[8..15])
       secs = zclock / 1000
       msecs = zclock % 1000
       sent = Time.at(secs) + 1000.0/msecs
       sequence = unpack_uint64_big_endian(info[16..23])
-      [tag, version, device, sent, sequence]
+      [tag, compression_method, version, device, sent, sequence]
     end
   end
 end

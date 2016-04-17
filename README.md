@@ -78,6 +78,12 @@ module LogjamAgent
   # Configure max bytes allowed for all log lines. Defaults to 1Mb.
   # This setting only applies to the lines sent with the request.
   self.max_bytes_all_lines = 1024 * 1024
+
+  # Configure compression method. Defaults to NO_COMPRESSION. Available
+  # compression methods are GZIP_COMPRESSION and SNAPPY_COMPRESSION.
+  # Snappy is faster and less CPU intensive than GZIP, GZIP achieves
+  # higher compression rates.
+  # self.compression_method = GZIP_COMPRESSION
 end
 ```
 

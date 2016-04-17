@@ -20,6 +20,9 @@ Gem::Specification.new do |s|
 
   s.add_development_dependency "rake"
   s.add_development_dependency "i18n"
+  s.add_development_dependency "snappy"
+  s.add_development_dependency "oj"
+  s.add_development_dependency "byebug"
 
   s.add_runtime_dependency "activesupport"
   s.add_runtime_dependency "time_bandits", [">= 0.6.0"]

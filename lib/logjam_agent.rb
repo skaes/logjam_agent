@@ -114,6 +114,28 @@ module LogjamAgent
 
   extend RequestHandling
 
+  NO_COMPRESSION = 0
+  GZIP_COMPRESSION = 1
+  SNAPPY_COMPRESSION = 2
+
+  mattr_reader :compression_method
+  def self.compression_method=(compression_method)
+    case compression_method
+    when SNAPPY_COMPRESSION
+      begin
+        require "snappy"
+        @@compression_method = SNAPPY_COMPRESSION
+      rescue LoadError
+        # do nothing
+      end
+    when NO_COMPRESSION, GZIP_COMPRESSION
+      @@compression_method = compression_method
+    else
+      raise ArgumentError.new("unknown compression method")
+    end
+  end
+  self.compression_method = NO_COMPRESSION
+
   mattr_accessor :exception_classes
   self.exception_classes = []
 
@@ -191,12 +213,24 @@ module LogjamAgent
   # setup json encoding
   begin
     require "oj"
-    def self.encode_payload(data)
+    def self.json_encode_payload(data)
       Oj.dump(data, :mode => :compat)
     end
   rescue LoadError
-    def self.encode_payload(data)
+    def self.json_encode_payload(data)
       data.to_json
+    end
+  end
+
+  def self.encode_payload(data)
+    json = json_encode_payload(data)
+    case compression_method
+    when GZIP_COMPRESSION
+      ActiveSupport::Gzip.compress(json)
+    when SNAPPY_COMPRESSION
+      Snappy.deflate(json)
+    else
+      json
     end
   end
 
