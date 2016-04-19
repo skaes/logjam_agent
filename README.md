@@ -80,10 +80,11 @@ module LogjamAgent
   self.max_bytes_all_lines = 1024 * 1024
 
   # Configure compression method. Defaults to NO_COMPRESSION. Available
-  # compression methods are GZIP_COMPRESSION and SNAPPY_COMPRESSION.
-  # Snappy is faster and less CPU intensive than GZIP, GZIP achieves
+  # compression methods are ZLIB_COMPRESSION and SNAPPY_COMPRESSION.
+  # Snappy is faster and less CPU intensive than ZLIB, ZLIB achieves
   # higher compression rates.
-  # self.compression_method = GZIP_COMPRESSION
+  # self.compression_method = ZLIB_COMPRESSION
+  # self.compression_method = SNAPPY_COMPRESSION
 end
 ```
 
