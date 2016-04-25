@@ -15,6 +15,11 @@ module LogjamAgent
     ensure
       headers = result[1]
       headers["X-Logjam-Request-Id"] = request.id
+      # this cookie is intended for JS code, which can't read it from response headers.
+      # it's superior to returning it with the html body, because that makes caching hard.
+      if set_request_id_cookie?(request, env)
+        ::Rack::Utils.set_cookie_header!(headers, "X-Logjam-Request-Id", {:value => request.id, :path => "/"})
+      end
       unless (request_action = request.fields[:action]).blank?
         headers["X-Logjam-Request-Action"] = request_action
       end
@@ -36,6 +41,10 @@ module LogjamAgent
 
     def finish_request(env)
       LogjamAgent.finish_request(env["time_bandits.metrics"])
+    end
+
+    def set_request_id_cookie?(request, env)
+      !(request.ignored? || env["HTTP_X_REQUESTED_WITH"] == "XMLHttpRequest")
     end
   end
 end
