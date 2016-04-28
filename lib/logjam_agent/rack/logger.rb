@@ -77,7 +77,7 @@ module LogjamAgent
 
         logjam_request.start_time = start_time
         logjam_fields = logjam_request.fields
-        ip = LogjamAgent.ip_obfuscator(request.ip)
+        ip = LogjamAgent.ip_obfuscator(env["action_dispatch.remote_ip"])
         logjam_fields.merge!(:ip => ip, :host => @hostname)
         logjam_fields.merge!(extract_request_info(request))
 
