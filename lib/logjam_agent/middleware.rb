@@ -6,6 +6,7 @@ module LogjamAgent
     end
 
     def call(env)
+      strip_encoding_from_etag(env)
       request = start_request(env)
       result = @app.call(env)
       result[1] ||= {}
@@ -25,6 +26,15 @@ module LogjamAgent
     end
 
     private
+
+    def strip_encoding_from_etag(env)
+      # In some versions, Apache is appending the content encoding,
+      # like gzip to the ETag-Response-Header, which will cause the
+      # Rack::ConditionalGet middleware to never match.
+      if env["HTTP_IF_NONE_MATCH"] =~ /\A(.*)-\w+(\")\z/
+        env["HTTP_IF_NONE_MATCH"] = $1 + $2
+      end
+    end
 
     def start_request(env)
       app_name      = env["logjam_agent.application_name"] || LogjamAgent.application_name
