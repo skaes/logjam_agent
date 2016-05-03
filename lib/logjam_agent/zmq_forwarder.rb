@@ -10,15 +10,17 @@ module LogjamAgent
       @env = args[1] || LogjamAgent.environment_name
       @app_env = "#{@app}-#{@env}"
       @config = default_options.merge!(opts)
-      @zmq_hosts = Array(@config[:host])
-      @zmq_port = @config[:port]
+      @connection_specs = Array(@config[:host]).map{|host| "tcp://#{host}:#{@config[:port]}"}
       @sequence = 0
     end
 
     def default_options
       {
         :host         => "localhost",
-        :port         => 12345
+        :port         => 9605,
+        :linger       => 100,
+        :snd_hwm      => 100,
+        :io_threads   => 1
       }
     end
 
@@ -30,7 +32,7 @@ module LogjamAgent
         @@zmq_context ||=
           begin
             require 'ffi-rzmq'
-            context = ZMQ::Context.new(1)
+            context = ZMQ::Context.new(@config[:io_threads])
             at_exit { context.terminate }
             context
           end
@@ -41,10 +43,10 @@ module LogjamAgent
       @socket ||=
         begin
           socket = self.class.context.socket(ZMQ::PUSH)
-          socket.setsockopt(ZMQ::LINGER, 100)
-          socket.setsockopt(ZMQ::SNDHWM, 10)
-          @zmq_hosts.each do |host|
-            socket.connect("tcp://#{host}:#{@zmq_port}")
+          socket.setsockopt(ZMQ::LINGER, @config[:linger])
+          socket.setsockopt(ZMQ::SNDHWM, @config[:snd_hwm])
+          @connection_specs.each do |spec|
+            socket.connect(spec)
           end
           at_exit { reset }
           socket
