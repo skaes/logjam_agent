@@ -57,5 +57,12 @@ module LogjamAgent
       sequence = unpack_uint64_big_endian(info[16..23])
       [tag, compression_method, version, device, sent, sequence]
     end
+
+    def augment_connection_spec(spec, default_port)
+      protocol, host, port = %r{\A(?:([^:]+)://)?([^:]+)(?::(\d+))?\z}.match(spec).captures
+      protocol ||= "tcp"
+      port ||= default_port
+      "#{protocol}://#{host}:#{port}"
+    end
   end
 end

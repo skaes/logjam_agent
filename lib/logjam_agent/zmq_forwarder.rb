@@ -1,6 +1,6 @@
 module LogjamAgent
   class ZMQForwarder
-    attr_reader :app, :env
+    attr_reader :app, :env, :connection_specs
 
     include Util
 
@@ -10,7 +10,9 @@ module LogjamAgent
       @env = args[1] || LogjamAgent.environment_name
       @app_env = "#{@app}-#{@env}"
       @config = default_options.merge!(opts)
-      @connection_specs = Array(@config[:host]).map{|host| "tcp://#{host}:#{@config[:port]}"}
+      @connection_specs = @config[:host].split(',').map do |host|
+        augment_connection_spec(host, @config[:port])
+      end
       @sequence = 0
     end
 
