@@ -72,6 +72,9 @@ module LogjamAgent
 
       LogjamAgent.application_revision = `git rev-parse HEAD 2>/dev/null`.chomp rescue ""
 
+      # disable logjam request forwarding by default in test environment
+      LogjamAgent.disable! if Rails.env.test?
+
       # patch controller testing to create a logjam request, because middlewares aren't executed
       if Rails.env.test?
         ActiveSupport.on_load(:action_controller) do
