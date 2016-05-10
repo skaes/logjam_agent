@@ -38,8 +38,12 @@ module LogjamAgent
   # Configure the application revision (optional). Defaults to (git rev-parse HEAD).
   # self.application_revision = "f494e11afa0738b279517a2a96101a952052da5d"
 
-  # Configure request data forwarder for ZeroMQ.
-  add_forwarder(:zmq, :host => "logjam.instance.at.your.org", :port => 9605)
+  # Configure request data forwarder for ZeroMQ. Default options as given below.
+  add_forwarder(:zmq,
+                :host    => "localhost",
+                :port    => 9605,
+                :linger  => 100,
+                :snd_hwm => 100)
 
   # Configure request data forwarder for AMQP.
   # add_forwarder(:amqp, :host => "message.broker.at.your.org")
