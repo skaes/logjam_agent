@@ -1,6 +1,6 @@
 module LogjamAgent
   class ZMQForwarder
-    attr_reader :app, :env
+    attr_reader :app, :env, :connection_specs
 
     include Util
 
@@ -10,22 +10,19 @@ module LogjamAgent
       @env = args[1] || LogjamAgent.environment_name
       @app_env = "#{@app}-#{@env}"
       @config = default_options.merge!(opts)
+      @config[:host] = "localhost" if @config[:host].blank?
+      @connection_specs = @config[:host].split(',').map do |host|
+        augment_connection_spec(host, @config[:port])
+      end
       @sequence = 0
     end
 
     def default_options
       {
-        :host         => "localhost",
         :port         => 9605,
         :linger       => 100,
         :snd_hwm      => 100,
       }
-    end
-
-    def connection_specs
-      @connection_specs ||= @config[:host].split(',').map do |host|
-        augment_connection_spec(host, @config[:port])
-      end
     end
 
     @@mutex = Mutex.new
@@ -44,17 +41,15 @@ module LogjamAgent
     end
 
     def socket
-      @socket ||=
-        begin
-          socket = self.class.context.socket(ZMQ::PUSH)
-          socket.setsockopt(ZMQ::LINGER, @config[:linger])
-          socket.setsockopt(ZMQ::SNDHWM, @config[:snd_hwm])
-          connection_specs.each do |spec|
-            socket.connect(spec)
-          end
-          at_exit { reset }
-          socket
-        end
+      return @socket if @socket
+      @socket = self.class.context.socket(ZMQ::PUSH)
+      at_exit { reset }
+      @socket.setsockopt(ZMQ::LINGER, @config[:linger])
+      @socket.setsockopt(ZMQ::SNDHWM, @config[:snd_hwm])
+      @connection_specs.each do |spec|
+        @socket.connect(spec)
+      end
+      @socket
     end
 
     def reset
