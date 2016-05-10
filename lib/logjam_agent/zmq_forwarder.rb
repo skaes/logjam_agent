@@ -20,7 +20,6 @@ module LogjamAgent
         :port         => 9605,
         :linger       => 100,
         :snd_hwm      => 100,
-        :io_threads   => 1
       }
     end
 
@@ -32,7 +31,7 @@ module LogjamAgent
         @@zmq_context ||=
           begin
             require 'ffi-rzmq'
-            context = ZMQ::Context.new(@config[:io_threads])
+            context = ZMQ::Context.new(1)
             at_exit { context.terminate }
             context
           end
