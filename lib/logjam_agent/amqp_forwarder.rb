@@ -28,36 +28,38 @@ module LogjamAgent
     end
 
     # TODO: mutex!
-    def forward(msg, options = {})
+    def forward(data, options = {})
       return if paused?
-      begin
-        app_env = options[:app_env] || @app_env
-        key = options[:routing_key] || "logs.#{app_env.sub('-','.')}"
-        if engine = options[:engine]
-          key += ".#{engine}"
-        end
-        info = pack_info(@sequence = next_fixnum(@sequence))
-        exchange(app_env).publish(msg, :key => key, :persistent => false, :headers => {:info => info})
-      rescue => error
-        reraise_expectation_errors!
-        pause(error)
+      app_env = options[:app_env] || @app_env
+      key = options[:routing_key] || "logs.#{app_env.sub('-','.')}"
+      if engine = options[:engine]
+        key += ".#{engine}"
       end
+      msg = LogjamAgent.encode_payload(data)
+      publish(app_env, key, msg)
+    rescue => error
+      reraise_expectation_errors!
+      pause(error)
+    end
+
+    def publish(app_env, key, data)
+      info = pack_info(@sequence = next_fixnum(@sequence))
+      exchange(app_env).publish(data, :key => key, :persistent => false, :headers => {:info => info})
     end
 
     def reset(exception=nil)
       return unless @bunny
-      begin
-        if exception
-          @bunny.__send__(:close_socket)
-        else
-          @bunny.stop
-        end
-      rescue
-        # if bunny throws an exception here, its not usable anymore anyway
-      ensure
-        @exchanges = {}
-        @bunny = nil
+      if exception
+        @bunny.__send__(:close_socket)
+      else
+        @bunny.stop
       end
+    rescue
+      # swallow StandardError
+    ensure
+      # if bunny throws an exception here, its not usable anymore anyway
+      @exchanges = {}
+      @bunny = nil
     end
 
     private

@@ -84,8 +84,7 @@ module LogjamAgent
     def forward
       return if @ignored || LogjamAgent.disabled
       engine = @fields.delete(:engine)
-      # puts @fields.inspect
-      @forwarder.forward(LogjamAgent.encode_payload(@fields), :engine => engine)
+      @forwarder.forward(@fields, :engine => engine)
     rescue Exception => e
       handle_forwarding_error(e)
     end
