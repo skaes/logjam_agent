@@ -241,7 +241,7 @@ module LogjamAgent
       :host       => hostname
     }
     fields.merge!(extra_fields)
-    forwarder.forward(encode_payload(fields), :routing_key => events_routing_key)
+    forwarder.forward(fields, :routing_key => events_routing_key)
   end
 
   def self.add_forwarder(type, *args)
