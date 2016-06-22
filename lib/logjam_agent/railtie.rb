@@ -107,6 +107,12 @@ module LogjamAgent
       EVA
     end
 
+    config.after_initialize do
+      if LogjamAgent.ignore_render_events
+        ActiveSupport::Notifications.unsubscribe("render_template.action_view")
+        ActiveSupport::Notifications.unsubscribe("render_partial.action_view")
+        ActiveSupport::Notifications.unsubscribe("render_collection.action_view")
+      end
+    end
   end
 end
-

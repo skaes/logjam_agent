@@ -145,6 +145,9 @@ module LogjamAgent
   mattr_accessor :ignore_asset_requests
   self.ignore_asset_requests = false
 
+  mattr_accessor :ignore_render_events
+  self.ignore_render_events = false
+
   mattr_accessor :log_device_ignored_lines
   self.log_device_ignored_lines = nil
 
