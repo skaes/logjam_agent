@@ -61,6 +61,10 @@ module LogjamAgent
   # to debug asset request handling.
   self.ignore_asset_requests = Rails.env.development?
 
+  # Disable ActiveSupport::Notifications (and thereby logging) of ActionView
+  # render events. Defaults to false.
+  # self.ignore_render_events = Rails.env.production?
+
   # Configure log level for logging on disk: only lines with a log level
   # greater than or equal to the specified one will be logged to disk.
   # Defaults to Logger::INFO. Note that logjam_agent extends the standard
