@@ -40,11 +40,11 @@ module LogjamAgent
 
   # Configure request data forwarder for ZeroMQ. Default options as given below.
   # the host parameter can be a comma separted list of zmq connection specifictions,
-  # where ths protocol prefix and port suffix are optional.
+  # where the protocol prefix and port suffix are optional.
   add_forwarder(:zmq,
                 :host    => "localhost",
                 :port    => 9605,
-                :linger  => 100,
+                :linger  => 1000,
                 :snd_hwm => 100)
 
   # Configure request data forwarder for AMQP.
