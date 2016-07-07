@@ -108,9 +108,9 @@ module LogjamAgent
     end
 
     if Rails::VERSION::STRING >= "5.0"
-      # we want our exceptions logged as a single string
-      # TODO: actually, when logging with tags, we might want to have tags and timestamps,
-      # but only on disk. Not sure how useful this would be.
+      # we want backtraces etc. logged as a single string with newlines.
+      # TODO: when logging with tags, we might want to have tags and
+      # timestamps on disk. Not sure how useful this would be, though.
       ActiveSupport.on_load(:action_controller) do
         ActionDispatch::DebugExceptions.class_eval do
           def log_error(request, wrapper)
