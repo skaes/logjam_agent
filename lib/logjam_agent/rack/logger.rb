@@ -226,7 +226,7 @@ module ActionController #:nodoc:
         info "  Parameters: #{params.inspect}" unless params.empty?
       end
 
-    elsif Rails::VERSION::STRING =~ /\A(3\.2|4\.[012])/
+    elsif Rails::VERSION::STRING =~ /\A(3\.2|4\.[012]|5)/
 
       # Rails 4.1 uses method_added to automatically subscribe newly
       # added methods. Since start_processing is already defined, the
