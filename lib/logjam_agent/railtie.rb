@@ -107,6 +107,32 @@ module LogjamAgent
       EVA
     end
 
+    if Rails::VERSION::STRING >= "5.0"
+      # we want our exceptions logged as a single string
+      # TODO: actually, when logging with tags, we might want to have tags and timestamps,
+      # but only on disk. Not sure how useful this would be.
+      ActiveSupport.on_load(:action_controller) do
+        ActionDispatch::DebugExceptions.class_eval do
+          def log_error(request, wrapper)
+            logger = logger(request)
+            return unless logger
+
+            exception = wrapper.exception
+
+            trace = wrapper.application_trace
+            trace = wrapper.framework_trace if trace.empty?
+
+            ActiveSupport::Deprecation.silence do
+              parts = [ "#{exception.class} (#{exception.message})" ]
+              parts.concact exception.annoted_source_code if exception.respond_to?(:annoted_source_code)
+              parts.concat trace
+              logger.fatal parts.join("\n  ")
+            end
+          end
+        end
+      end
+    end
+
     config.after_initialize do
       if LogjamAgent.ignore_render_events
         ActiveSupport::Notifications.unsubscribe("render_template.action_view")
