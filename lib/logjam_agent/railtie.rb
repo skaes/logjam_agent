@@ -78,16 +78,16 @@ module LogjamAgent
       # patch controller testing to create a logjam request, because middlewares aren't executed
       if Rails.env.test?
         ActiveSupport.on_load(:action_controller) do
-          require 'action_controller/test_case'
-          module ActionController::TestCase::Behavior
-            def process_with_logjam(*args)
+          module TestWithLogjamStartRequest
+            def process(*args)
               LogjamAgent.start_request
-              process_without_logjam(*args)
+              super
             ensure
               LogjamAgent.finish_request
             end
-            alias_method_chain :process, :logjam
           end
+          require 'action_controller/test_case'
+          ActionController::TestCase::Behavior.prepend TestWithLogjamStartRequest
         end
       end
     end
