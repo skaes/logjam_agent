@@ -45,8 +45,8 @@ module LogjamAgent
       LogjamAgent.environment_name = Rails.env
       LogjamAgent.auto_detect_logged_exceptions
 
-      app.config.middleware.swap("TimeBandits::Rack::Logger", "LogjamAgent::Rack::Logger")
-      app.config.middleware.insert_before("LogjamAgent::Rack::Logger", "LogjamAgent::Middleware")
+      app.config.middleware.swap(TimeBandits::Rack::Logger, LogjamAgent::Rack::Logger)
+      app.config.middleware.insert_before(LogjamAgent::Rack::Logger, LogjamAgent::Middleware)
 
       if defined?(::ActionDispatch::RemoteIp)
         app.config.middleware.delete ::ActionDispatch::RemoteIp
