@@ -87,7 +87,7 @@ module LogjamAgent
             end
           end
           require 'action_controller/test_case'
-          ActionController::TestCase::Behavior.prepend TestWithLogjamStartRequest
+          ActionController::TestCase.prepend TestWithLogjamStartRequest
         end
       end
     end
