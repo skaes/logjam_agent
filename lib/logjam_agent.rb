@@ -50,6 +50,7 @@ end
 module LogjamAgent
 
   class ForwardingError < StandardError; end
+  class ForwardingWarning < StandardError; end
 
   mattr_accessor :logger
   self.logger = nil
@@ -241,10 +242,11 @@ module LogjamAgent
     fields = {
       :label      => label,
       :started_at => Time.now.iso8601,
-      :host       => hostname
+      :host       => hostname,
+      :uuid       => generate_uuid
     }
     fields.merge!(extra_fields)
-    forwarder.forward(fields, :routing_key => events_routing_key)
+    forwarder.forward(fields, :routing_key => events_routing_key, :sync => true)
   end
 
   def self.add_forwarder(type, *args)

@@ -39,13 +39,17 @@ module LogjamAgent
   # self.application_revision = "f494e11afa0738b279517a2a96101a952052da5d"
 
   # Configure request data forwarder for ZeroMQ. Default options as given below.
-  # the host parameter can be a comma separted list of zmq connection specifictions,
-  # where the protocol prefix and port suffix are optional.
+  # The host parameter can be a comma separted list of zmq connection specifictions,
+  # where the protocol prefix and port suffix are optional. req_port, rcv_timeo and
+  # snd_timeo options only apply for sychronous messages (LogjamAgent.event).
   add_forwarder(:zmq,
-                :host    => "localhost",
-                :port    => 9605,
-                :linger  => 1000,
-                :snd_hwm => 100)
+                :host      => "localhost",
+                :port      => 9605,
+                :req_port  => 9604,
+                :linger    => 1000,
+                :snd_hwm   => 100,
+                :rcv_timeo => 5000,
+                :snd_timeo => 5000)
 
   # Configure request data forwarder for AMQP.
   # add_forwarder(:amqp, :host => "message.broker.at.your.org")
@@ -126,7 +130,7 @@ LogjamAgent.error_handler = lambda {|exception| ... }
 
 The MIT License
 
-Copyright (c) 2013 - 2015 Stefan Kaes
+Copyright (c) 2013 - 2016 Stefan Kaes
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
