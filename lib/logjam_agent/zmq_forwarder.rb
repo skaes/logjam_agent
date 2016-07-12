@@ -1,6 +1,6 @@
 module LogjamAgent
   class ZMQForwarder
-    attr_reader :app, :env, :connection_specs
+    attr_reader :app, :env
 
     include Util
 
