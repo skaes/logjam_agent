@@ -7,24 +7,14 @@ module LogjamAgent
       LogjamAgent.compression_method = NO_COMPRESSION
     end
 
-    test "sets up single push connection with default port" do
+    test "sets up single connection with default port" do
       f = ZMQForwarder.new(:host => "a.b.c", :port => 3001)
-      assert_equal ["tcp://a.b.c:3001"], f.push_connection_specs
+      assert_equal ["tcp://a.b.c:3001"], f.connection_specs
     end
 
-    test "sets up multiple push connections" do
+    test "sets up multiple connections" do
       f = ZMQForwarder.new(:host => "a.b.c,tcp://x.y.z:9000,zmq.gnu.org:600")
-      assert_equal %w(tcp://a.b.c:9605 tcp://x.y.z:9000 tcp://zmq.gnu.org:600), f.push_connection_specs
-    end
-
-    test "sets up single req connection with default port" do
-      f = ZMQForwarder.new(:host => "a.b.c", :req_port => 3001)
-      assert_equal ["tcp://a.b.c:3001"], f.req_connection_specs
-    end
-
-    test "sets up multiple req connections" do
-      f = ZMQForwarder.new(:host => "a.b.c,tcp://x.y.z:9000,zmq.gnu.org:600")
-      assert_equal %w(tcp://a.b.c:9604 tcp://x.y.z:9000 tcp://zmq.gnu.org:600).sort, f.req_connection_specs.sort
+      assert_equal %w(tcp://a.b.c:9604 tcp://x.y.z:9000 tcp://zmq.gnu.org:600), f.connection_specs
     end
 
     test "encodes the payload" do

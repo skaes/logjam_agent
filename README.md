@@ -40,14 +40,13 @@ module LogjamAgent
 
   # Configure request data forwarder for ZeroMQ. Default options as given below.
   # The host parameter can be a comma separted list of zmq connection specifictions,
-  # where the protocol prefix and port suffix are optional. req_port, rcv_timeo and
-  # snd_timeo options only apply for sychronous messages (LogjamAgent.event).
+  # where the protocol prefix and port suffix are optional. rcv_timeo and
+  # snd_timeo options only apply for sychronous messages.
   add_forwarder(:zmq,
                 :host      => "localhost",
-                :port      => 9605,
-                :req_port  => 9604,
+                :port      => 9604,
                 :linger    => 1000,
-                :snd_hwm   => 100,
+                :snd_hwm   =>  100,
                 :rcv_timeo => 5000,
                 :snd_timeo => 5000)
 
