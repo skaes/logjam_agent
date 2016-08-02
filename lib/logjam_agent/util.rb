@@ -39,7 +39,7 @@ module LogjamAgent
     end
 
     def next_fixnum(i)
-      (i+=1) > FIXNUM_MAX ? 0 : i
+      (i+=1) > FIXNUM_MAX ? 1 : i
     end
 
     def pack_info(n)
