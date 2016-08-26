@@ -42,8 +42,8 @@ module LogjamAgent
       (i+=1) > FIXNUM_MAX ? 1 : i
     end
 
-    def pack_info(n)
-      info = [META_INFO_TAG, LogjamAgent.compression_method, META_INFO_VERSION, META_INFO_DEVICE_NUMBER].pack("nCCN")
+    def pack_info(n, compression_method = LogjamAgent.compression_method)
+      info = [META_INFO_TAG, compression_method, META_INFO_VERSION, META_INFO_DEVICE_NUMBER].pack("nCCN")
       info << pack_uint64_big_endian(zclock_time)
       info << pack_uint64_big_endian(n)
     end

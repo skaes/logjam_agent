@@ -51,7 +51,7 @@ module LogjamAgent
     def socket
       return @socket if @socket
       @socket = self.class.context.socket(ZMQ::DEALER)
-      at_exit { reset }
+      at_exit { ping; reset }
       @socket.setsockopt(ZMQ::LINGER, @config[:linger])
       @socket.setsockopt(ZMQ::SNDHWM, @config[:snd_hwm])
       @socket.setsockopt(ZMQ::RCVHWM, @config[:rcv_hwm])
@@ -103,22 +103,29 @@ module LogjamAgent
 
     VALID_RESPONSE_CODES = [200,202]
 
-    def send_receive(app_env, key, data)
-      info = pack_info(@sequence = next_fixnum(@sequence))
+    def send_receive(app_env, key, data, compression_method = LogjamAgent.compression_method)
+      info = pack_info(@sequence = next_fixnum(@sequence), compression_method)
       request_parts = ["", app_env, key, data, info]
       answer_parts = []
       if socket.send_strings(request_parts) < 0
         log_warning "ZMQ error on sending: #{ZMQ::Util.error_string}"
         reset
-        return
+        return nil
       end
       if socket.recv_strings(answer_parts) < 0
         log_warning "ZMQ error on receiving: #{ZMQ::Util.error_string}"
         reset
-        return
+        return nil
       end
       if answer_parts.first != "" || !VALID_RESPONSE_CODES.include?(answer_parts.second.to_s.to_i)
         log_warning "unexpected answer from logjam broker: #{answer_parts.inspect}"
+      end
+      answer_parts.second
+    end
+
+    def ping
+      unless send_receive("ping", "", "{}", NO_COMPRESSION)
+        log_warning "failed to receive pong"
       end
     end
 
