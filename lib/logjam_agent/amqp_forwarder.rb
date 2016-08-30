@@ -88,10 +88,14 @@ module LogjamAgent
       @exchanges[app_env] ||=
         begin
           bunny.start unless bunny.connected?
-          bunny.exchange("request-stream-#{app_env}",
-                         :durable => @config[:exchange_durable],
-                         :auto_delete => @config[:exchange_auto_delete],
-                         :type => :topic)
+          channel = bunny.create_channel
+          Bunny::Exchange.new(
+            channel,
+            :topic,
+            "request-stream-#{app_env}",
+            :durable => @config[:exchange_durable],
+            :auto_delete => @config[:exchange_auto_delete]
+          )
         end
     end
 
