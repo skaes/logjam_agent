@@ -28,10 +28,16 @@ module LogjamAgent
       def call_app(request, env)
         start_time = Time.now
         start_time_header = env['HTTP_X_STARTTIME']
-        if start_time_header && start_time_header =~ /\At=(\d+)\z/
-          # HTTP_X_STARTTIME is microseconds since the epoch (UTC)
-          http_start_time = Time.at($1.to_f / 1_000_000.0)
-          if (wait_time_ms = (start_time - http_start_time) * 1000) > 0
+        if start_time_header
+          if start_time_header =~ /\At=(\d+)\z/
+            # HTTP_X_STARTTIME is microseconds since the epoch (UTC)
+            http_start_time = Time.at($1.to_f / 1_000_000.0)
+          elsif start_time_header =~ /\Ats=(\d+)(?:\.(\d+))?\z/
+            # HTTP_X_STARTTIME is seconds since the epoch (UTC) with a milliseconds resolution
+            http_start_time = Time.at($1.to_f + $2.to_f / 1000)
+          end
+
+          if http_start_time && (wait_time_ms = (start_time - http_start_time) * 1000) > 0
             start_time = http_start_time
           end
         else
