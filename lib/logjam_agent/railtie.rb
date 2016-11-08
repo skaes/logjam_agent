@@ -70,7 +70,8 @@ module LogjamAgent
       # ignore asset requests in development
       LogjamAgent.ignore_asset_requests = Rails.env.development?
 
-      LogjamAgent.application_revision = `git rev-parse HEAD 2>/dev/null`.chomp rescue ""
+      revision_file = File.join(app.root, 'REVISION')
+      LogjamAgent.application_revision = File.exist?(revision_file) ? File.read(revision_file) : `git rev-parse HEAD 2>/dev/null`.chomp rescue ""
 
       # disable logjam request forwarding by default in test environment
       LogjamAgent.disable! if Rails.env.test?
