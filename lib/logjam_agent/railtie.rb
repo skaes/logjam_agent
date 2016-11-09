@@ -16,7 +16,7 @@ module LogjamAgent
     initializer "initialize_logjam_agent_logger", :before => :initialize_logger do |app|
       Rails.logger ||= app.config.logger ||
         begin
-          path = logjam_log_path(app)
+          path = ENV["RAILS_LOG_TO_STDOUT"].present? ? STDOUT : logjam_log_path(app)
           logger = LogjamAgent::BufferedLogger.new(path)
           logger.level = ::Logger.const_get(app.config.log_level.to_s.upcase)
           LogjamAgent.log_device_log_level = logger.level
@@ -57,9 +57,9 @@ module LogjamAgent
       end
 
       # install a default error handler for forwarding errors
-      log_dir = File.dirname(logjam_log_path(app))
+      log_path = ENV["RAILS_LOG_TO_STDOUT"].present? ? STDERR : File.dirname(logjam_log_path(app)) + "/logjam_agent_error.log"
       begin
-        forwarding_error_logger = ::Logger.new("#{log_dir}/logjam_agent_error.log")
+        forwarding_error_logger = ::Logger.new(log_path)
       rescue StandardError
         forwarding_error_logger = ::Logger.new(STDERR)
       end
