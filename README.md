@@ -118,6 +118,7 @@ fall back to the `to_json` method.
 
 If the agent experiences problems when sending data, it will log information to a file named
 `logjam_agent_error.log` which you can find under `Rails.root/log`.
+If you set the `RAILS_LOG_TO_STDOUT` environment variable, those logs will be available through `stderr`.
 
 This behavior is customizable via a module level call back method:
 
