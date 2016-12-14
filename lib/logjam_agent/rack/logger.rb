@@ -87,7 +87,7 @@ module LogjamAgent
         ip = nil
         begin
           ip = LogjamAgent.ip_obfuscator(env["action_dispatch.remote_ip"].to_s)
-        rescue IpSpoofAttackError => spoofed
+        rescue ActionDispatch::RemoteIp::IpSpoofAttackError => spoofed
           ip = "*** SPOOFED IP ***"
         end
         logjam_fields.merge!(:ip => ip, :host => @hostname)
