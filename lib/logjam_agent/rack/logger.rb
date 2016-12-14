@@ -83,11 +83,21 @@ module LogjamAgent
 
         logjam_request.start_time = start_time
         logjam_fields = logjam_request.fields
-        ip = LogjamAgent.ip_obfuscator(env["action_dispatch.remote_ip"].to_s)
+        spoofed = nil
+        ip = nil
+        begin
+          ip = LogjamAgent.ip_obfuscator(env["action_dispatch.remote_ip"].to_s)
+        rescue IpSpoofAttackError => spoofed
+          ip = "*** SPOOFED IP ***"
+        end
         logjam_fields.merge!(:ip => ip, :host => @hostname)
         logjam_fields.merge!(extract_request_info(request))
 
         info "Started #{request.request_method} \"#{path}\" for #{ip} at #{start_time.to_default_s}" unless logjam_request.ignored?
+        if spoofed
+          error spoofed
+          raise spoofed
+        end
       end
 
       def after_dispatch(env, result, run_time_ms, wait_time_ms)
