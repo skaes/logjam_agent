@@ -45,6 +45,8 @@ module LogjamAgent
         end
         before_dispatch(request, env, start_time)
         result = @app.call(env)
+      rescue ActionDispatch::RemoteIp::IpSpoofAttackError
+        result = [403, {}, ['Forbidden']]
       ensure
         run_time_ms = (Time.now - start_time) * 1000
         after_dispatch(env, result, run_time_ms, wait_time_ms)
