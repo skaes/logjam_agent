@@ -75,9 +75,13 @@ module LogjamAgent
       end
     end
 
-    def add_exception(exception)
+    def add_exception(exception, severity = Logger::ERROR)
       @mutex.synchronize do
-        ((@fields[:exceptions] ||= []) << exception).uniq!
+        if severity >= Logger::ERROR
+          ((@fields[:exceptions] ||= []) << exception).uniq!
+        else
+          ((@fields[:soft_exceptions] ||= []) << exception).uniq!
+        end
       end
     end
 
