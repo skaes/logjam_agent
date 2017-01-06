@@ -161,6 +161,9 @@ module LogjamAgent
   mattr_accessor :log_device_log_level
   self.log_device_log_level = Logger::INFO
 
+  mattr_accessor :split_hard_and_soft_exceptions
+  self.split_hard_and_soft_exceptions = false
+
   def self.log_to_log_device?(severity, msg)
     return false if severity < log_device_log_level
     if override_global_ignore_lines?
