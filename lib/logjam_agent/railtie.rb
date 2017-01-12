@@ -126,7 +126,7 @@ module LogjamAgent
 
             ActiveSupport::Deprecation.silence do
               parts = [ "#{exception.class} (#{exception.message})" ]
-              parts.concact exception.annoted_source_code if exception.respond_to?(:annoted_source_code)
+              parts.concat exception.annoted_source_code if exception.respond_to?(:annoted_source_code)
               parts.concat trace
               logger.fatal parts.join("\n  ")
             end
