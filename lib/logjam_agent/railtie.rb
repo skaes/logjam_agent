@@ -80,6 +80,8 @@ module LogjamAgent
       if Rails.env.test?
         ActiveSupport.on_load(:action_controller) do
           require 'action_controller/test_case'
+          # Rails 5 fires on_load events multiple times, so we need to protect against endless recursion
+          next if ActionController::TestCase::Behavior.instance_methods.include?(:process_without_logjam)
           module ActionController::TestCase::Behavior
             def process_with_logjam(*args)
               LogjamAgent.start_request
