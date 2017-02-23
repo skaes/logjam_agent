@@ -57,9 +57,8 @@ module LogjamAgent
       @socket.setsockopt(ZMQ::RCVHWM, @config[:rcv_hwm])
       @socket.setsockopt(ZMQ::RCVTIMEO, @config[:rcv_timeo])
       @socket.setsockopt(ZMQ::SNDTIMEO, @config[:snd_timeo])
-      connection_specs.each do |spec|
-        @socket.connect(spec)
-      end
+      spec = connection_specs.sort_by{rand}.first
+      @socket.connect(spec)
       @socket
     end
 
