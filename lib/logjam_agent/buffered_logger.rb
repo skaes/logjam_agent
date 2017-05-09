@@ -69,7 +69,7 @@ module LogjamAgent
       message ||= block.call || '' if block
       request = LogjamAgent.request
       if message.is_a?(Exception)
-        request.add_exception(message.class.to_s) if request
+        request.add_exception(message.class.to_s, severity) if request
         message = format_exception(message)
       else
         message = message.to_s

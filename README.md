@@ -98,6 +98,12 @@ module LogjamAgent
   # higher compression rates.
   # self.compression_method = ZLIB_COMPRESSION
   # self.compression_method = SNAPPY_COMPRESSION
+
+  # Activate the split between hard and soft-exceptions. Soft exceptions are
+  # all exceptions below a log level of Logger::ERROR.
+  # Logjam itself can then display those soft exceptions differently.
+  # defaults to `false`
+  self.split_hard_and_soft_exceptions = true
 end
 ```
 
