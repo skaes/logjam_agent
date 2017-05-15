@@ -162,7 +162,7 @@ module LogjamAgent
   self.log_device_log_level = Logger::INFO
 
   mattr_accessor :split_hard_and_soft_exceptions
-  self.split_hard_and_soft_exceptions = false
+  self.split_hard_and_soft_exceptions = true
 
   def self.log_to_log_device?(severity, msg)
     return false if severity < log_device_log_level
