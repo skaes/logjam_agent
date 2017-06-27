@@ -179,13 +179,13 @@ module LogjamAgent
 
         if referer = headers[REFERER]
           headers[REFERER] = referer.gsub(PAIR_RE) do |_|
-            filter.filter([[$1, $2]]).first.join("=")
+            filter.filter($1 => $2).first.join("=")
           end
         end
 
         if (cookie = headers[COOKIE]) && LogjamAgent.obfuscated_cookies.present?
           headers[COOKIE] = cookie.gsub(PAIR_RE) do |_|
-            LogjamAgent.cookie_obfuscator.filter([[$1, $2]]).first.join("=")
+            LogjamAgent.cookie_obfuscator.filter($1 => $2).first.join("=")
           end
         end
 
