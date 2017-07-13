@@ -49,7 +49,11 @@ module LogjamAgent
       app.config.middleware.insert_before(LogjamAgent::Rack::Logger, LogjamAgent::Middleware)
 
       if defined?(::ActionDispatch::RemoteIp)
-        app.config.middleware.delete ::ActionDispatch::RemoteIp
+        # see https://github.com/rails/rails/issues/26303
+        class DummyMiddleware < Rails::Railtie; end
+        app.config.middleware.swap ::ActionDispatch::RemoteIp, DummyMiddleware
+        app.config.middleware.delete DummyMiddleware
+
         app.config.middleware.insert_before LogjamAgent::Middleware, ::ActionDispatch::RemoteIp, app.config.action_dispatch.ip_spoofing_check, app.config.action_dispatch.trusted_proxies
       else
         require 'logjam_agent/actionpack/lib/action_dispatch/middleware/remote_ip'
