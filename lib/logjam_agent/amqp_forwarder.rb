@@ -16,6 +16,7 @@ module LogjamAgent
       @exchanges = {}
       @bunny = nil
       @sequence = 0
+      @paused = nil
       ensure_bunny_gem_is_available
     end
 
