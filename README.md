@@ -84,6 +84,10 @@ module LogjamAgent
   # for example in a Rails before_action
   # LogjamAgent.request.log_device_ignored_lines = /^\s*(?:Rendered|REDIS)/
 
+  # Configure maximum size of logged paremters and envronment variables sent to
+  # logjam. Defaults to 1024.
+  # self.max_logged_param_size = 1024
+
   # Configure maximum log line length. Defaults to 2048.
   # This setting only applies to the lines sent with the request.
   self.max_line_length = 2048

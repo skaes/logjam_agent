@@ -147,6 +147,14 @@ module LogjamAgent
         ActiveSupport::Notifications.unsubscribe("render_partial.action_view")
         ActiveSupport::Notifications.unsubscribe("render_collection.action_view")
       end
+
+      max_size = LogjamAgent.max_logged_param_size
+      truncate_overlong_params = lambda { |key, value|
+        if value.is_a?(String) && value.bytesize > max_size
+          value[max_size..-1] = " ... [TRUNCATED]"
+        end
+      }
+      Rails.application.config.filter_parameters += [truncate_overlong_params]
     end
   end
 end

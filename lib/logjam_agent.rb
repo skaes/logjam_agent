@@ -152,6 +152,9 @@ module LogjamAgent
   mattr_accessor :log_device_ignored_lines
   self.log_device_ignored_lines = nil
 
+  mattr_accessor :max_logged_param_size
+  self.max_logged_param_size = 1024
+
   mattr_accessor :max_line_length
   self.max_line_length = 2048
 
