@@ -155,6 +155,17 @@ module LogjamAgent
   mattr_accessor :max_logged_param_size
   self.max_logged_param_size = 1024
 
+  mattr_accessor :max_logged_cookie_size
+  self.max_logged_cookie_size = 1024 * 100
+
+  def self.max_logged_size_for(key)
+    if key == 'HTTP_COOKIE'.freeze
+      max_logged_cookie_size
+    else
+      max_logged_param_size
+    end
+  end
+
   mattr_accessor :max_line_length
   self.max_line_length = 2048
 
