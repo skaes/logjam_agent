@@ -150,7 +150,7 @@ module LogjamAgent
 
       truncate_overlong_params = lambda { |key, value|
         max_size = LogjamAgent.max_logged_size_for(key)
-        if value.is_a?(String) && value.bytesize > max_size
+        if value.is_a?(String) && value.size > max_size
           value[max_size..-1] = " ... [TRUNCATED]"
         end
       }
