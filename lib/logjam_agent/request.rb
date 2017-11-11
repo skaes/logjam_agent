@@ -26,6 +26,9 @@ module LogjamAgent
       if ENV['DATACENTER']
         @fields[:datacenter] = ENV['DATACENTER']
       end
+      if ENV['NAMESPACE']
+        @fields[:namespace] = ENV['NAMESPACE']
+      end
       if start_time = @fields.delete(:start_time)
         self.start_time = start_time
       end
