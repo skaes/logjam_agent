@@ -20,6 +20,12 @@ module LogjamAgent
       unless (revision = LogjamAgent.application_revision).blank?
         @fields[:revision] = revision
       end
+      if ENV['CLUSTER']
+        @fields[:cluster] = ENV['CLUSTER']
+      end
+      if ENV['DATACENTER']
+        @fields[:datacenter] = ENV['DATACENTER']
+      end
       if start_time = @fields.delete(:start_time)
         self.start_time = start_time
       end
