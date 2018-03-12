@@ -37,6 +37,7 @@ module LogjamAgent
       @bytes_all_lines = 0
       @max_bytes_all_lines = LogjamAgent.max_bytes_all_lines
       @max_line_length = LogjamAgent.max_line_length
+      @lines_dropped = false
     end
 
     def start_time=(start_time)
@@ -70,17 +71,22 @@ module LogjamAgent
     end
 
     def add_line(severity, timestamp, message)
-      return if @bytes_all_lines > @max_bytes_all_lines
-      message = message.strip
-      if message.size > @max_line_length && severity < Logger::ERROR
-        message[(@max_line_length-21)..-1] = " ... [LINE TRUNCATED]"
-      end
       @mutex.synchronize do
-        if (@bytes_all_lines += message.bytesize) < @max_bytes_all_lines
-          @lines << [severity, format_time(timestamp), message]
-        else
-          @lines << [severity, format_time(timestamp), "... [LINES DROPPED]"]
+        if @bytes_all_lines > @max_bytes_all_lines
+          unless @lines_dropped
+            @lines << [severity, format_time(timestamp), "... [LINES DROPPED]"]
+            @lines_dropped = true
+          end
+          return
         end
+        message = message.strip
+        if message.size > @max_line_length && severity < Logger::ERROR
+          message[(@max_line_length-21)..-1] = " ... [LINE TRUNCATED]"
+        end
+        if (@bytes_all_lines += message.bytesize) > @max_bytes_all_lines
+          message[(@max_line_length-21)..-1] = " ... [LINE TRUNCATED]"
+        end
+        @lines << [severity, format_time(timestamp), message]
       end
     end
 
