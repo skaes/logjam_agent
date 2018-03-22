@@ -31,10 +31,17 @@ module LogjamAgent
       assert_equal "x" * 70, lines(@request).first[2]
     end
 
-    def test_truncates_error_lines_if_message_size_id_larger_than_max_bytes_all_lines
+    def test_truncates_long_error_lines_if_message_size_is_larger_than_max_bytes_all_lines
       @request.add_line(Logger::ERROR, Time.now, "x" * 120)
       assert_equal 1, lines(@request).size
-      assert_equal TRUNCATED_LINE, lines(@request).first[2]
+      assert_equal TRUNCATED_LINE, lines(@request)[0][2]
+    end
+
+    def test_truncates_long_lines_if_message_size_is_larger_than_max_bytes_all_lines
+      @request.add_line(Logger::INFO, Time.now, "y" * 80)
+      @request.add_line(Logger::ERROR, Time.now, "x" * 80)
+      assert_equal 2, lines(@request).size
+      assert_equal TRUNCATED_LINE, lines(@request)[1][2]
     end
 
     private

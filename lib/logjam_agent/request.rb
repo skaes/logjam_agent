@@ -80,11 +80,14 @@ module LogjamAgent
           return
         end
         message = message.strip
-        if message.size > @max_line_length && severity < Logger::ERROR
+        line_too_long = message.size > @max_line_length
+        if line_too_long && severity < Logger::ERROR
           message[(@max_line_length-21)..-1] = " ... [LINE TRUNCATED]"
         end
         if (@bytes_all_lines += message.bytesize) > @max_bytes_all_lines
-          message[(@max_line_length-21)..-1] = " ... [LINE TRUNCATED]"
+          if line_too_long
+            message[(@max_line_length-21)..-1] = " ... [LINE TRUNCATED]"
+          end
         end
         @lines << [severity, format_time(timestamp), message]
       end
