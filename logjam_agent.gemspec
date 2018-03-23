@@ -7,7 +7,7 @@ Gem::Specification.new do |s|
   s.version     = LogjamAgent::VERSION
   s.authors     = ["Stefan Kaes"]
   s.email       = ["stefan.kaes@xing.com"]
-  s.homepage    = ""
+  s.homepage    = "https://github.com/skaes/logjam_agent"
   s.summary     = %q{Logjam client library to be used with logjam}
   s.description = %q{Logjam logger and request information forwarding}
 
