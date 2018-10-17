@@ -42,7 +42,7 @@ module LogjamAgent
     end
 
     initializer "logjam_agent", :after => "time_bandits" do |app|
-      LogjamAgent.environment_name = Rails.env
+      LogjamAgent.environment_name = ENV['LOGJAM_ENV'] || Rails.env
       LogjamAgent.auto_detect_logged_exceptions
 
       app.config.middleware.swap(TimeBandits::Rack::Logger, LogjamAgent::Rack::Logger)
