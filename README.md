@@ -5,16 +5,11 @@ Client side library for logjam.
 Hooks into Rails, collects log lines, performance metrics, error/exception infomation and Rack
 environment information and sends this data to [Logjam](https://github.com/skaes/logjam_app).
 
-Currently two alternate mechanisms are available for data transport: AMQP or ZeroMQ.
+Currently only one mechanism is available for data transport:
+ZeroMQ. Support for AMQP has been dropped.
 
 ## Usage
 
-For AMQP, add
-
-```ruby
-gem "logjam_agent"
-gem "bunny"
-```
 For ZeroMQ, add
 
 ```ruby
@@ -49,9 +44,6 @@ module LogjamAgent
                 :snd_hwm   =>  100,
                 :rcv_timeo => 5000,
                 :snd_timeo => 5000)
-
-  # Configure request data forwarder for AMQP.
-  # add_forwarder(:amqp, :host => "message.broker.at.your.org")
 
   # Configure ip obfuscation. Defaults to no obfuscation.
   self.obfuscate_ips = true
@@ -162,8 +154,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
-
-
-
-
-

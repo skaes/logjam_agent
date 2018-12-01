@@ -30,7 +30,6 @@ end
 
 require "logjam_agent/version"
 require "logjam_agent/util"
-require "logjam_agent/amqp_forwarder"
 require "logjam_agent/zmq_forwarder"
 require "logjam_agent/forwarders"
 require "logjam_agent/request"
@@ -269,7 +268,7 @@ module LogjamAgent
   def self.add_forwarder(type, *args)
     case type
     when :zmq then Forwarders.add(ZMQForwarder.new(*args))
-    when :amqp then Forwarders.add(AMQPForwarder.new(*args))
+    when :amqp then ArgumentError.new("logjam amqp transport no longer supported")
     else raise ArgumentError.new("unkown logjam transport: '#{type}'")
     end
   end

@@ -16,8 +16,7 @@ module LogjamAgent
       @@forwarders.each_value {|f| f.reset}
     end
 
-    # properly close AMQP connections on program termination
-    # this avoids 'connection_closed_abruptly' in the rabbit logs
+    # properly close open sockets on program termination
     at_exit { reset }
 
     def inspect
