@@ -30,7 +30,29 @@ module LogjamAgent
       normal_msg = LogjamAgent.encode_payload(data)
       LogjamAgent.compression_method = SNAPPY_COMPRESSION
       compressed_msg = LogjamAgent.encode_payload(data)
-      assert_equal normal_msg, Snappy.inflate(compressed_msg)
+      assert_equal normal_msg, LogjamAgent.decode_payload(compressed_msg)
+      f = ZMQForwarder.new
+      f.expects(:publish).with("a-b", "x", compressed_msg)
+      f.forward(data, :routing_key => "x", :app_env => "a-b")
+    end
+
+    test "compressed message using lz4 can be uncompressed" do
+      data = {a: 1, b: "str"}
+      normal_msg = LogjamAgent.encode_payload(data)
+      LogjamAgent.compression_method = LZ4_COMPRESSION
+      compressed_msg = LogjamAgent.encode_payload(data)
+      assert_equal normal_msg, LogjamAgent.decode_payload(compressed_msg)
+      f = ZMQForwarder.new
+      f.expects(:publish).with("a-b", "x", compressed_msg)
+      f.forward(data, :routing_key => "x", :app_env => "a-b")
+    end
+
+    test "compressed message using zlib can be uncompressed" do
+      data = {a: 1, b: "str"}
+      normal_msg = LogjamAgent.encode_payload(data)
+      LogjamAgent.compression_method = ZLIB_COMPRESSION
+      compressed_msg = LogjamAgent.encode_payload(data)
+      assert_equal normal_msg, LogjamAgent.decode_payload(compressed_msg)
       f = ZMQForwarder.new
       f.expects(:publish).with("a-b", "x", compressed_msg)
       f.forward(data, :routing_key => "x", :app_env => "a-b")

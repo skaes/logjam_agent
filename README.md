@@ -93,11 +93,13 @@ module LogjamAgent
   self.max_bytes_all_lines = 1024 * 1024
 
   # Configure compression method. Defaults to NO_COMPRESSION. Available
-  # compression methods are ZLIB_COMPRESSION and SNAPPY_COMPRESSION.
-  # Snappy is faster and less CPU intensive than ZLIB, ZLIB achieves
-  # higher compression rates.
+  # compression methods are ZLIB_COMPRESSION, SNAPPY_COMPRESSION, LZ4_COMPRESSION.
+  # Snappy and LZ4 are faster and less CPU intensive than ZLIB, ZLIB achieves
+  # higher compression rates. LZ4 is faster to decompress than Snappy
+  # and recommended.
   # self.compression_method = ZLIB_COMPRESSION
   # self.compression_method = SNAPPY_COMPRESSION
+  # self.compression_method = LZ4_COMPRESSION
 
   # Activate the split between hard and soft-exceptions. Soft exceptions are
   # all exceptions below a log level of Logger::ERROR. Logjam itself can then
@@ -110,7 +112,7 @@ end
 
 The agent generates unique request ids for all request handled. It
 will use [uuid4r](https://github.com/skaes/uuid4r) if this is
-avalaibale in the application. Otherwise it will fall back to use the
+available in the application. Otherwise it will fall back to use the
 standard `SecureRandom` class shipped with Ruby.
 
 ### Generating JSON
@@ -135,7 +137,7 @@ LogjamAgent.error_handler = lambda {|exception| ... }
 
 The MIT License
 
-Copyright (c) 2013 - 2016 Stefan Kaes
+Copyright (c) 2013 - 2019 Stefan Kaes
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

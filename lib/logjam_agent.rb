@@ -117,6 +117,7 @@ module LogjamAgent
   NO_COMPRESSION = 0
   ZLIB_COMPRESSION = 1
   SNAPPY_COMPRESSION = 2
+  LZ4_COMPRESSION= 3
 
   mattr_reader :compression_method
   def self.compression_method=(compression_method)
@@ -125,6 +126,13 @@ module LogjamAgent
       begin
         require "snappy"
         @@compression_method = SNAPPY_COMPRESSION
+      rescue LoadError
+        # do nothing
+      end
+    when LZ4_COMPRESSION
+      begin
+        require "ruby-lz4"
+        @@compression_method = LZ4_COMPRESSION
       rescue LoadError
         # do nothing
       end
@@ -245,12 +253,32 @@ module LogjamAgent
   def self.encode_payload(data)
     json = json_encode_payload(data)
     case compression_method
-    when ZLIB_COMPRESSION
-      ActiveSupport::Gzip.compress(json)
     when SNAPPY_COMPRESSION
       Snappy.deflate(json)
+    when LZ4_COMPRESSION
+      n = data.byte_size
+      max_compressed_size = n + n/256 + 16
+      buf = String.new([n].pack("N"), capacity: max_compressed_size + 4)
+      LZ4::Raw.compress(json, input_size: n, dest: buf, max_ouput_size: max_compressed_size).first
+    when ZLIB_COMPRESSION
+      ActiveSupport::Gzip.compress(json)
     else
       json
+    end
+  end
+
+  def self.decode_payload(data)
+    case compression_method
+    when SNAPPY_COMPRESSION
+      Snappy.inflate(data)
+    when LZ4_COMPRESSION
+      uncompressed_size = data[0..3].unpack("N")
+      buf = String.new("", capacity: uncompressed_size)
+      LZ4::Raw.decompress(data[4..-1], uncompressed_size, dest: buf).first
+    when ZLIB_COMPRESSION
+      ActiveSupport::Gzip.decompress(data)
+    else
+      data
     end
   end
 

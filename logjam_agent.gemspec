@@ -21,6 +21,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency "rake"
   s.add_development_dependency "i18n"
   s.add_development_dependency "snappy"
+  s.add_development_dependency "lz4-ruby"
   s.add_development_dependency "oj"
   s.add_development_dependency "byebug"
   s.add_development_dependency "minitest"
