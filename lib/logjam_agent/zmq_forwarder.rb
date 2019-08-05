@@ -26,8 +26,8 @@ module LogjamAgent
       {
         :port       => 9604,
         :linger     => 1000,
-        :snd_hwm    =>  100,
-        :rcv_hwm    =>  100,
+        :snd_hwm    => 1000,
+        :rcv_hwm    => 1000,
         :rcv_timeo  => 5000,
         :snd_timeo  => 5000
       }
