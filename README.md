@@ -45,6 +45,9 @@ module LogjamAgent
                 :rcv_timeo => 5000,
                 :snd_timeo => 5000)
 
+  # Configure JSON logging on STDOUT.
+  # add_forwarder(:stdout)
+
   # Configure ip obfuscation. Defaults to no obfuscation.
   self.obfuscate_ips = true
 
