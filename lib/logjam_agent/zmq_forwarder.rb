@@ -90,6 +90,7 @@ module LogjamAgent
       info = pack_info(@sequence = next_fixnum(@sequence))
       parts = [app_env, key, data, info]
       if socket.send_strings(parts, ZMQ::DONTWAIT) < 0
+        reset
         raise "ZMQ error on publishing: #{ZMQ::Util.error_string}"
       end
     end
