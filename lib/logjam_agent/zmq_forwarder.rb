@@ -14,6 +14,8 @@ module LogjamAgent
       @config = default_options.merge!(opts)
       @config[:host] = "localhost" if @config[:host].blank?
       @sequence = SEQUENCE_START
+      @socket = nil
+      at_exit { ping; reset }
     end
 
     def connection_specs
@@ -51,7 +53,6 @@ module LogjamAgent
     def socket
       return @socket if @socket
       @socket = self.class.context.socket(ZMQ::DEALER)
-      at_exit { ping; reset }
       @socket.setsockopt(ZMQ::LINGER, @config[:linger])
       @socket.setsockopt(ZMQ::SNDHWM, @config[:snd_hwm])
       @socket.setsockopt(ZMQ::RCVHWM, @config[:rcv_hwm])
@@ -124,7 +125,7 @@ module LogjamAgent
     end
 
     def ping
-      unless send_receive("ping", "", "{}", NO_COMPRESSION)
+      if @socket && !send_receive("ping", "", "{}", NO_COMPRESSION)
         log_warning "failed to receive pong"
       end
     end
