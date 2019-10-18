@@ -125,7 +125,7 @@ module LogjamAgent
     end
 
     def ping
-      if @socket && !send_receive("ping", "", "{}", NO_COMPRESSION)
+      if @socket && !send_receive("ping", @app_env, "{}", NO_COMPRESSION)
         log_warning "failed to receive pong"
       end
     end
