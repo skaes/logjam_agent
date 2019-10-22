@@ -15,7 +15,7 @@ module LogjamAgent
       @config[:host] = "localhost" if @config[:host].blank?
       @sequence = SEQUENCE_START
       @socket = nil
-      at_exit { ping; reset }
+      @ping_ensured = false
     end
 
     def connection_specs
@@ -53,6 +53,7 @@ module LogjamAgent
     def socket
       return @socket if @socket
       @socket = self.class.context.socket(ZMQ::DEALER)
+      ensure_ping_at_exit
       @socket.setsockopt(ZMQ::LINGER, @config[:linger])
       @socket.setsockopt(ZMQ::SNDHWM, @config[:snd_hwm])
       @socket.setsockopt(ZMQ::RCVHWM, @config[:rcv_hwm])
@@ -68,6 +69,12 @@ module LogjamAgent
         @socket.close
         @socket = nil
       end
+    end
+
+    def ensure_ping_at_exit
+      return if @ping_ensured
+      at_exit { ping; reset }
+      @ping_ensured = true
     end
 
     def forward(data, options={})
