@@ -109,7 +109,12 @@ module LogjamAgent
   self.obfuscated_cookies = [/_session\z/]
 
   def self.cookie_obfuscator
-    @cookie_obfuscator ||= ActionDispatch::Http::ParameterFilter.new(obfuscated_cookies)
+    @cookie_obfuscator ||=
+      if defined?(ActiveSupport::ParameterFilter)
+        ActiveSupport::ParameterFilter.new(obfuscated_cookies)
+      else
+        ActionDispatch::Http::ParameterFilter.new(obfuscated_cookies)
+      end
   end
 
   extend RequestHandling
