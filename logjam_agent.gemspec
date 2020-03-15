@@ -11,8 +11,6 @@ Gem::Specification.new do |s|
   s.summary     = %q{Logjam client library to be used with logjam}
   s.description = %q{Logjam logger and request information forwarding}
 
-  s.rubyforge_project = "logjam_agent"
-
   s.files         = `git ls-files`.split("\n")
   s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
   s.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
