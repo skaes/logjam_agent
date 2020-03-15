@@ -5,11 +5,19 @@ module LogjamAgent
     def initialize
       @hostname = LogjamAgent.hostname
       @app_name = "rails"
-      @attributes = []
       @newline = ActiveSupport::VERSION::STRING < "4.0" ? "" : "\n"
     end
 
-    attr_accessor :attributes
+    def attributes=(attributes)
+      Thread.current.thread_variable_set(:__logjam_formatter_attributes__, attributes)
+    end
+
+    def attributes
+      unless attributes = Thread.current.thread_variable_get(:__logjam_formatter_attributes__)
+        attributes = Thread.current.thread_variable_set(:__logjam_formatter_attributes__, [])
+      end
+      attributes
+    end
 
     SEV_LABEL = Logger::SEV_LABEL.map{|sev| "%-5s" % sev}
 
@@ -42,19 +50,19 @@ module LogjamAgent
     end
 
     def render_attributes
-      @attributes.map{|key, value| " #{key}[#{value}]"}.join
+      attributes.map{|key, value| " #{key}[#{value}]"}.join
     end
 
     def set_attribute(name, value)
-      if attribute = @attributes.detect{|n,v| n == name}
+      if attribute = attributes.detect{|n,v| n == name}
         attribute[1] = value
       else
-        @attributes << [name, value]
+        attributes << [name, value]
       end
     end
 
     def reset_attributes
-      @attributes = []
+      self.attributes = []
     end
   end
 end
