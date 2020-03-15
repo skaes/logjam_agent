@@ -12,7 +12,7 @@ module LogjamAgent
       result[1] ||= {}
       result
     rescue Exception
-      result = [500, {'Content-Type' => 'text/html'}, ["<html><body><h1>500 Internal Server Error</h1>"]]
+      result = [500, {'Content-Type' => 'text/html'}, ["<html><body><h1>500 Internal Server Error</h1></body></html>"]]
     ensure
       headers = result[1]
       headers["X-Logjam-Request-Id"] = request.id
