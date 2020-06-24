@@ -8,4 +8,5 @@ class MiniTest::Test
   extend ActiveSupport::Testing::Declarative
 end
 
-require_relative "../lib/logjam_agent"
+$:.unshift File.expand_path('../../lib', __FILE__)
+require "logjam_agent"
