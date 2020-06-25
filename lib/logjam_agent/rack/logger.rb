@@ -16,7 +16,8 @@ module LogjamAgent
       end
 
       def call(env)
-        request = defined?(Sinatra) ? Sinatra::Request.new(env) : ActionDispatch::Request.new(env)
+        framework = env["logjam_agent.framework"]
+        request = framework == :sinatra ? Sinatra::Request.new(env) : ActionDispatch::Request.new(env)
 
         if logger.respond_to?(:tagged) && !@taggers.empty?
           logger.tagged(compute_tags(request)) { call_app(request, env) }
@@ -47,8 +48,8 @@ module LogjamAgent
         end
         before_dispatch(request, env, start_time)
         result = @app.call(env)
-      # rescue ActionDispatch::RemoteIp::IpSpoofAttackError
-      #   result = [403, {}, ['Forbidden']]
+      rescue ActionDispatch::RemoteIp::IpSpoofAttackError
+        result = [403, {}, ['Forbidden']]
       ensure
         run_time_ms = (Time.now - start_time) * 1000
         after_dispatch(env, result, run_time_ms, wait_time_ms)
@@ -91,8 +92,8 @@ module LogjamAgent
         ip = nil
         begin
           ip = LogjamAgent.ip_obfuscator((env["action_dispatch.remote_ip"] || request.ip).to_s)
-        # rescue ActionDispatch::RemoteIp::IpSpoofAttackError => spoofed
-        #   ip = "*** SPOOFED IP ***"
+        rescue ActionDispatch::RemoteIp::IpSpoofAttackError => spoofed
+          ip = "*** SPOOFED IP ***"
         end
         logjam_fields.merge!(:ip => ip, :host => @hostname)
         logjam_fields.merge!(extract_request_info(request))

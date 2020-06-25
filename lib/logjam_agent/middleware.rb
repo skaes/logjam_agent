@@ -1,11 +1,15 @@
 module LogjamAgent
   class Middleware
-    def initialize(app, options={})
+    def initialize(app, framework = :rails)
       @app = app
-      @options = options
+      @framework = framework
+      unless %i{rails sinatra}.include?(framework)
+        raise ArgumentError.new("Invalid logjam_agent framework: #{framework}. Only :rails and :sinatra are valid!")
+      end
     end
 
     def call(env)
+      env["logjam_agent.framework"] = @framework
       strip_encoding_from_etag(env)
       request = start_request(env)
       result = @app.call(env)

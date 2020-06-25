@@ -4,6 +4,7 @@ require 'logjam_agent'
 require 'logjam_agent/middleware'
 require 'logjam_agent/rack/sinatra_request'
 require 'logjam_agent/rack/logger'
+require 'time_bandits'
 
 module Sinatra
   module Logjam
@@ -33,7 +34,7 @@ module Sinatra
     def self.registered(app)
       app.helpers Logjam::Helpers
 
-      app.use LogjamAgent::Middleware
+      app.use LogjamAgent::Middleware, :sinatra
       app.use LogjamAgent::Rack::Logger
 
       LogjamAgent.environment_name = app.settings.environment
@@ -43,4 +44,11 @@ module Sinatra
   end
 
   register Logjam
+end
+
+# Define exception, but doen' do anything about it. Sneaky!
+module ActionDispatch
+  module RemoteIp
+    class IpSpoofAttackError < StandardError; end
+  end
 end
