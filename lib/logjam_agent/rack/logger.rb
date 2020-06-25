@@ -17,7 +17,12 @@ module LogjamAgent
 
       def call(env)
         framework = env["logjam_agent.framework"]
-        request = framework == :sinatra ? Sinatra::Request.new(env) : ActionDispatch::Request.new(env)
+        if framework == :sinatra
+          request = Sinatra::Request.new(env)
+          env["rack.logger"] = logger
+        else
+          request = ActionDispatch::Request.new(env)
+        end
 
         if logger.respond_to?(:tagged) && !@taggers.empty?
           logger.tagged(compute_tags(request)) { call_app(request, env) }
