@@ -45,7 +45,7 @@ module LogjamAgent
     end
 
     def finish_request(env)
-      LogjamAgent.finish_request(env["time_bandits.metrics"] || {})
+      LogjamAgent.finish_request(env["time_bandits.metrics"])
     end
   end
 end

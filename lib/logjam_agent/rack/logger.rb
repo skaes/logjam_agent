@@ -9,14 +9,14 @@ module LogjamAgent
     class Logger < ActiveSupport::LogSubscriber
       def initialize(app, taggers = nil)
         @app = app
-        @taggers = taggers || (Rails.application.config.log_tags rescue []) || []
+        @taggers = taggers || (defined?(Rails) ? Rails.application.config.log_tags : []) || []
         @hostname = LogjamAgent.hostname
         @asset_prefix = Rails.application.config.assets.prefix rescue "---"
         @ignore_asset_requests = LogjamAgent.ignore_asset_requests
       end
 
       def call(env)
-        request = defined?(ActionDispatch)? ActionDispatch::Request.new(env) : ::Rack::Request.new(env)
+        request = defined?(Sinatra) ? Sinatra::Request.new(env) : ActionDispatch::Request.new(env)
 
         if logger.respond_to?(:tagged) && !@taggers.empty?
           logger.tagged(compute_tags(request)) { call_app(request, env) }
@@ -80,8 +80,7 @@ module LogjamAgent
         TimeBandits.reset
         Thread.current.thread_variable_set(:time_bandits_completed_info, nil)
 
-        filter = defined?(Rails) ? request.send(:parameter_filter) : ActiveSupport::ParameterFilter.new(LogjamAgent.parameter_filters)
-        path = request.respond_to?(:filtered_path) ? request.filtered_path : filtered_path(request, filter)
+        path = request.filtered_path
 
         logjam_request = LogjamAgent.request
         logjam_request.ignore! if ignored_asset_request?(path)
@@ -96,9 +95,9 @@ module LogjamAgent
         #   ip = "*** SPOOFED IP ***"
         end
         logjam_fields.merge!(:ip => ip, :host => @hostname)
-        logjam_fields.merge!(extract_request_info(request, env, path, filter))
+        logjam_fields.merge!(extract_request_info(request))
 
-        info "Started #{request.method rescue request.request_method} \"#{path}\" for #{ip} at #{start_time.to_default_s}" unless logjam_request.ignored?
+        info "Started #{request.request_method} \"#{path}\" for #{ip} at #{start_time.to_default_s}" unless logjam_request.ignored?
         if spoofed
           error spoofed
           raise spoofed
@@ -134,23 +133,23 @@ module LogjamAgent
         env["time_bandits.metrics"] = TimeBandits.metrics
       end
 
-      def extract_request_info(request, env, filtered_path, filter)
+      def extract_request_info(request)
         request_info = {}
         result = { :request_info => request_info }
 
-        request_info[:method] = request.method rescue (request.request_method rescue "UnknownwMethod")
-        request_info[:url] = filtered_path
+        filter = request.send(:parameter_filter)
+
+        request_info[:method] = request.method rescue "UnknownwMethod"
+        request_info[:url] = request.filtered_path
         request_info[:headers] = extract_headers(request, filter)
 
         unless request.query_string.empty?
-          query_params = request.query_parameters rescue request.GET
-          query_params = filter.filter(query_params)
+          query_params = filter.filter(request.query_parameters)
           request_info[:query_parameters] = query_params unless query_params.empty?
         end
 
         unless request.content_length == 0
-          body_params = request.request.request_parameters rescue request.POST
-          body_params = filter.filter(body_params)
+          body_params = filter.filter(request.request_parameters)
           request_info[:body_parameters] = body_params unless body_params.empty?
         end
 
@@ -158,9 +157,6 @@ module LogjamAgent
       rescue Exception => e
         logger.error(e)
         result
-      ensure
-        # puts env.inspect
-        # puts result.inspect
       end
 
       HIDDEN_VARIABLES = /\A([a-z]|SERVER|PATH|GATEWAY|REQUEST|SCRIPT|REMOTE|QUERY|PASSENGER|DOCUMENT|SCGI|UNION_STATION|ORIGINAL_|ROUTES_|RAW_POST_DATA|HTTP_AUTHORIZATION)/o
@@ -203,15 +199,6 @@ module LogjamAgent
 
         headers
       end
-
-      def filtered_path(request, filter)
-        return request.path if request.query_string.empty?
-        filtered_query_string = request.query_string.gsub(PAIR_RE) do |_|
-          filter.filter($1 => $2).first.join("=")
-        end
-        "#{request.path}?#{filtered_query_string}"
-      end
-
     end
   end
 end
