@@ -53,7 +53,7 @@ module Sinatra
       app.use LogjamAgent::Middleware, :sinatra
       app.use LogjamAgent::Rack::Logger
 
-      LogjamAgent.environment_name = ENV['LOGJAM_ENV'] || ENV['APP_ENV'] || app.settings.environment.to_s
+      LogjamAgent.environment_name = ENV['LOGJAM_ENV'] || app.settings.environment.to_s
       LogjamAgent.auto_detect_logged_exceptions
       LogjamAgent.disable! if app.settings.environment.to_sym == :test
 

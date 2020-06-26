@@ -25,8 +25,11 @@ class SinatraTestApp < Sinatra::Base
     LogjamAgent.parameter_filters << :password
   end
 
-  get '/index' do
+  before '/index' do
     action_name "Simple#index"
+  end
+
+  get '/index' do
     logger.info 'Hello World!'
     'Hello World!'
   end

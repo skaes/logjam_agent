@@ -5,6 +5,8 @@ Client side library for logjam.
 Hooks into Rails, collects log lines, performance metrics, error/exception infomation and Rack
 environment information and sends this data to [Logjam](https://github.com/skaes/logjam_app).
 
+Has experimental support for Sinatra.
+
 Currently only one mechanism is available for data transport:
 ZeroMQ. Support for AMQP has been dropped.
 
@@ -120,6 +122,46 @@ standard `SecureRandom` class shipped with Ruby.
 The agent will try to use the [Oj](https://github.com/ohler55/oj) to
 generate JSON. If this is not available in your application, it will
 fall back to the `to_json` method.
+
+
+### Sinata
+
+Supports both classic and modular Sinatra applications. Since Sinatra doesn't have built
+in action names like Rails, you'll have to declare them in your handlers, or in a before
+filter. Example:
+
+```ruby
+require 'logjam_agent/sinatra'
+
+class SinatraTestApp < Sinatra::Base
+  register Sinatra::Logjam
+
+  configure do
+    set :loglevel, :debug
+    setup_logjam_logger
+
+    LogjamAgent.application_name = "myapp"
+    LogjamAgent.add_forwarder(:zmq, :host => "my-logjam-broker")
+    LogjamAgent.parameter_filters << :password
+  end
+
+  before '/index' do
+    action_name "Simple#index"
+  end
+
+  get '/index' do
+    logger.info 'Hello World!'
+    'Hello World!'
+  end
+end
+```
+
+The environment name is picked up from either the environment variable `LOGJAM_ENV`, or
+Sinatra's environment setting.
+
+Set the environment variable `APP_LOG_TO_STDOUT` if you want to log to `STDOUT`.
+Otherwise, logs will appear in the subdirectory `log` of your application's root.
+
 
 ## Troubleshooting
 
