@@ -112,10 +112,8 @@ end
 
 ### Generating unique request ids
 
-The agent generates unique request ids for all request handled. It
-will use [uuid4r](https://github.com/skaes/uuid4r) if this is
-available in the application. Otherwise it will fall back to use the
-standard `SecureRandom` class shipped with Ruby.
+The agent generates unique request ids for all request handled using standard
+`SecureRandom` class shipped with Ruby.
 
 ### Generating JSON
 
