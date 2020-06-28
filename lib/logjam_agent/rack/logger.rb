@@ -135,9 +135,9 @@ module LogjamAgent
         info message unless logjam_request.ignored?
 
         ActiveSupport::LogSubscriber.flush_all!
-        request_info = {
-          :total_time => run_time_ms, :code => status, :view_time => view_time || 0.0, :wait_time => wait_time_ms
-        }
+        request_info = { :total_time => run_time_ms, :code => status }
+        request_info[:view_time] = view_time if view_time > 0
+        request_info[:wait_time] = wait_time_ms if wait_time_ms > 0
         logjam_request.fields.merge!(request_info)
 
         env["time_bandits.metrics"] = TimeBandits.metrics
