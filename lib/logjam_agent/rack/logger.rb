@@ -18,7 +18,7 @@ module LogjamAgent
       def call(env)
         framework = env["logjam_agent.framework"]
         if framework == :sinatra
-          request = Sinatra::Request.new(env)
+          request = ::Sinatra::Request.new(env)
           env["rack.logger"] = logger
         else
           request = ActionDispatch::Request.new(env)

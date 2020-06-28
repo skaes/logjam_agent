@@ -8,7 +8,7 @@ module LogjamAgent
     include ::Rack::Test::Methods
 
     def app
-      Sinatra::Application
+      ::Sinatra::Application
     end
 
     def test_root

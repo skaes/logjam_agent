@@ -124,7 +124,7 @@ generate JSON. If this is not available in your application, it will
 fall back to the `to_json` method.
 
 
-### Sinata
+### Sinatra
 
 Supports both classic and modular Sinatra applications. Since Sinatra doesn't have built
 in action names like Rails, you'll have to declare them in your handlers, or in a before
@@ -133,8 +133,10 @@ filter. Example:
 ```ruby
 require 'logjam_agent/sinatra'
 
+use LogjamAgent::Sinatra::Middleware
+
 class SinatraTestApp < Sinatra::Base
-  register Sinatra::Logjam
+  register LogjamAgent::Sinatra
 
   configure do
     set :loglevel, :debug

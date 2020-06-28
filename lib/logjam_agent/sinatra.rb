@@ -5,8 +5,18 @@ require 'logjam_agent/middleware'
 require 'logjam_agent/rack/sinatra_request'
 require 'logjam_agent/rack/logger'
 
-module Sinatra
-  module Logjam
+module LogjamAgent
+  module Sinatra
+    class Middleware
+      def initialize(app)
+        app_with_logging = LogjamAgent::Rack::Logger.new(app)
+        @app = LogjamAgent::Middleware.new(app_with_logging, :sinatra)
+      end
+      def call(env)
+        @app.call(env)
+      end
+    end
+
     module Helpers
       def action_name(action_name)
         LogjamAgent.request.fields[:action] = action_name
@@ -48,21 +58,24 @@ module Sinatra
     end
 
     def self.registered(app)
-      app.helpers Logjam::Helpers
-
-      app.use LogjamAgent::Middleware, :sinatra
-      app.use LogjamAgent::Rack::Logger
-
+      app.helpers Helpers
       LogjamAgent.environment_name = ENV['LOGJAM_ENV'] || app.settings.environment.to_s
       LogjamAgent.auto_detect_logged_exceptions
       LogjamAgent.disable! if app.settings.environment.to_sym == :test
-
-      app.enable :logging
     end
   end
-
-  register Logjam
 end
+
+# For classic apps.
+Sinatra.register LogjamAgent::Sinatra
+
+# We already supply a logger
+Sinatra::Base.class_eval do
+  class << self
+    def setup_logging(builder); end
+  end
+end
+
 
 # Define exception, but don't do anything about it. Sneaky!
 module ActionDispatch

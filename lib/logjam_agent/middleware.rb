@@ -20,6 +20,9 @@ module LogjamAgent
     ensure
       headers = result[1]
       headers["X-Logjam-Request-Id"] = request.id
+      if env["sinatra.static_file"]
+        request.fields[:action] = "Sinatra#static_file"
+      end
       unless (request_action = request.fields[:action]).blank?
         headers["X-Logjam-Request-Action"] = request_action
       end

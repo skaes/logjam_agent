@@ -2,6 +2,8 @@ $:.unshift File.expand_path('../../lib', __FILE__)
 
 require 'logjam_agent/sinatra'
 
+use LogjamAgent::Sinatra::Middleware
+
 configure do
   set :root, File.expand_path('../..', __FILE__)
   set :environment, :test
