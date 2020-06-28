@@ -4,6 +4,7 @@ require 'logjam_agent'
 require 'logjam_agent/middleware'
 require 'logjam_agent/rack/sinatra_request'
 require 'logjam_agent/rack/logger'
+require 'time_bandits'
 
 module LogjamAgent
   module Sinatra
@@ -69,13 +70,39 @@ end
 # For classic apps.
 Sinatra.register LogjamAgent::Sinatra
 
-# We already supply a logger
+# We already supply a logger.
 Sinatra::Base.class_eval do
   class << self
     def setup_logging(builder); end
   end
 end
 
+# Patch Sinatra's render logic to compute corrected view times.
+module LogjamAgent
+  module ComputeRenderTimes
+    def render(engine, data, options = {}, locals = {}, &block)
+      consumed_before_rendering = TimeBandits.consumed
+      result = exception = nil
+      duration = Benchmark.ms do
+        begin
+          result = super
+        rescue => exception
+        end
+      end
+      consumed_during_rendering = TimeBandits.consumed - consumed_before_rendering
+      duration -= consumed_during_rendering
+      raise exception if exception
+      result
+    ensure
+      Thread.current.thread_variable_set(
+        :time_bandits_completed_info,
+        [ duration, ["Views: %.3fms" % duration.to_f], duration, "" ]
+      )
+    end
+  end
+end
+
+Sinatra::Base.prepend LogjamAgent::ComputeRenderTimes
 
 # Define exception, but don't do anything about it. Sneaky!
 module ActionDispatch
@@ -83,3 +110,7 @@ module ActionDispatch
     class IpSpoofAttackError < StandardError; end
   end
 end
+
+# Add GC time bandit
+TimeBandits.reset
+TimeBandits.add TimeBandits::TimeConsumers::GarbageCollection.instance if GC.respond_to? :enable_stats

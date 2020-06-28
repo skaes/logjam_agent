@@ -16,8 +16,7 @@ module LogjamAgent
       end
 
       def call(env)
-        framework = env["logjam_agent.framework"]
-        if framework == :sinatra
+        if env["logjam_agent.framework"] == :sinatra
           request = ::Sinatra::Request.new(env)
           env["rack.logger"] = logger
         else
@@ -114,6 +113,11 @@ module LogjamAgent
         status = result ? result.first.to_i : 500
         if completed_info = Thread.current.thread_variable_get(:time_bandits_completed_info)
           _, additions, view_time, _ = completed_info
+        end
+        additions ||= []
+        if env["logjam_agent.framework"] == :sinatra
+          TimeBandits.consumed
+          additions.concat TimeBandits.runtimes
         end
         logjam_request = LogjamAgent.request
 
