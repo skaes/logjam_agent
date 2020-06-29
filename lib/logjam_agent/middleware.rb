@@ -50,7 +50,7 @@ module LogjamAgent
       caller_action = env["HTTP_X_LOGJAM_ACTION"] || ""
       extra_fields = {}
       extra_fields[:caller_id] = caller_id if caller_id.present?
-      extra_fields[:caller_action] = caller_icaller_action if caller_action.present?
+      extra_fields[:caller_action] = caller_action if caller_action.present?
       LogjamAgent.start_request(app_name, env_name, extra_fields)
     end
 

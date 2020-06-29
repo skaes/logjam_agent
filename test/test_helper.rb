@@ -12,4 +12,4 @@ $:.unshift File.expand_path('../../lib', __FILE__)
 require "logjam_agent"
 
 # for Sinatra
-ENV['APP_ENV'] = "test"
+ENV['RACK_ENV'] = "test"
