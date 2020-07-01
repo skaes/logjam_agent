@@ -1,4 +1,9 @@
 require 'sinatra/base'
+begin
+  require 'active_support/parameter_filter'
+rescue LoadError
+  require_relative '../active_support/parameter_filter'
+end
 
 # Extend the Sinatra Request class with some methods to make it look more like an
 # ActionDispatch request.

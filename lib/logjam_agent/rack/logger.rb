@@ -1,5 +1,3 @@
-require 'active_support/parameter_filter'
-
 module LogjamAgent
 
   class CallerTimeoutExceeded < StandardError; end
