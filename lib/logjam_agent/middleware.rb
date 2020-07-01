@@ -6,6 +6,7 @@ module LogjamAgent
       unless %i{rails sinatra}.include?(framework)
         raise ArgumentError.new("Invalid logjam_agent framework: #{framework}. Only :rails and :sinatra are valid!")
       end
+      @reraise = defined?(Rails) && Rails.env.test?
     end
 
     def call(env)
@@ -17,6 +18,7 @@ module LogjamAgent
       result
     rescue Exception
       result = [500, {'Content-Type' => 'text/html'}, ["<html><body><h1>500 Internal Server Error</h1></body></html>"]]
+      raise if @reraise
     ensure
       headers = result[1]
       headers["X-Logjam-Request-Id"] = request.id
