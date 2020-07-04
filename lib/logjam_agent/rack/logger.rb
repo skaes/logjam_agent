@@ -7,7 +7,7 @@ module LogjamAgent
     class Logger < ActiveSupport::LogSubscriber
       def initialize(app, taggers = nil)
         @app = app
-        @taggers = taggers || (defined?(Rails) ? Rails.application.config.log_tags : []) || []
+        @taggers = taggers || (defined?(Rails::Railtie) ? Rails.application.config.log_tags : []) || []
         @hostname = LogjamAgent.hostname
         @asset_prefix = Rails.application.config.assets.prefix rescue "---"
         @ignore_asset_requests = LogjamAgent.ignore_asset_requests
@@ -211,6 +211,6 @@ module LogjamAgent
   end
 end
 
-if defined?(Rails)
+if defined?(Rails::Railtie)
   require_relative "rails_support"
 end

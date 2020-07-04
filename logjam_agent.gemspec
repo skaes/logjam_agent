@@ -29,7 +29,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency "appraisal"
 
   s.add_runtime_dependency "activesupport"
-  s.add_runtime_dependency "time_bandits", [">= 0.6.0"]
+  s.add_runtime_dependency "time_bandits", [">= 0.12.1"]
   s.add_runtime_dependency "ffi-rzmq-core", [">= 1.0.5"]
   s.add_runtime_dependency "ffi-rzmq", [">= 2.0.4"]
 end

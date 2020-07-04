@@ -36,9 +36,7 @@ require "logjam_agent/request"
 require "logjam_agent/buffered_logger"
 require "logjam_agent/syslog_like_formatter"
 
-if defined?(Rails) && Rails::VERSION::STRING >= "3.0"
-  require "logjam_agent/railtie"
-end
+require "logjam_agent/railtie" if defined?(Rails::Railtie)
 
 # monkey patch log levels to include NONE
 require 'logger'

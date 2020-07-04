@@ -6,7 +6,7 @@ module LogjamAgent
       unless %i{rails sinatra}.include?(framework)
         raise ArgumentError.new("Invalid logjam_agent framework: #{framework}. Only :rails and :sinatra are valid!")
       end
-      @reraise = defined?(Rails) && Rails.env.test?
+      @reraise = defined?(Rails::Railtie) && Rails.env.test?
     end
 
     def call(env)

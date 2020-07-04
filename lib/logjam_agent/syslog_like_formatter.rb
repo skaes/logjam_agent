@@ -41,7 +41,7 @@ module LogjamAgent
       "#{format_severity(severity)} #{format_time(timestamp)}#{render_attributes}#{format_host_info(progname)}: #{format_message(msg)}#{@newline}"
     end
 
-    if !defined?(Rails) || Rails.env.development?
+    if !defined?(Rails::Railtie) || Rails.env.development?
       def format_host_info(progname); ""; end
     else
       def format_host_info(progname)
