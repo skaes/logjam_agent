@@ -6,4 +6,6 @@ rvm:
   - 2.7.0
 before_install:
   - gem install bundler
+before_script:
+  - "bundle exec appraisal install"
 script: "bundle exec appraisal rake test integration"
