@@ -62,7 +62,12 @@ module LogjamAgent
       protocol, host, port = %r{\A(?:([^:]+)://)?([^:]+)(?::(\d+))?\z}.match(spec).captures
       protocol ||= "tcp"
       port ||= default_port
-      "#{protocol}://#{host}:#{port}"
+      if protocol == "inproc"
+        # should only be used for integration tests
+        "#{protocol}://#{host}"
+      else
+        "#{protocol}://#{host}:#{port}"
+      end
     end
   end
 end

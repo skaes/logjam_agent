@@ -24,5 +24,10 @@ module LogjamAgent
       assert_equal "tcp://a:1", augmented
     end
 
+    test "supports inproc" do
+      augmented = augment_connection_spec("inproc://hugo-schnugo", 2)
+      assert_equal "inproc://hugo-schnugo", augmented
+    end
+
   end
 end
