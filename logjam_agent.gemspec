@@ -10,6 +10,7 @@ Gem::Specification.new do |s|
   s.homepage    = "https://github.com/skaes/logjam_agent"
   s.summary     = %q{Logjam client library to be used with logjam}
   s.description = %q{Logjam logger and request information forwarding}
+  s.license     = 'MIT'
 
   s.files         = Dir['README.md', 'Rakefile', 'lib/**/*.rb']
   s.test_files    = Dir['test/**/*.rb']
