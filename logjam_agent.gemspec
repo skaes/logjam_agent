@@ -11,9 +11,9 @@ Gem::Specification.new do |s|
   s.summary     = %q{Logjam client library to be used with logjam}
   s.description = %q{Logjam logger and request information forwarding}
 
-  s.files         = `git ls-files`.split("\n")
-  s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
-  s.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
+  s.files         = Dir['README.md', 'Rakefile', 'lib/**/*.rb']
+  s.test_files    = Dir['test/**/*.rb']
+  s.executables   = []
   s.require_paths = ["lib"]
 
   s.add_development_dependency "rake"

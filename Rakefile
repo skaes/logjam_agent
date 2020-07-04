@@ -13,3 +13,7 @@ end
 task :default do
   Rake::Task[:test].invoke
 end
+
+task :integration do
+  sh "cd railsapp && rake"
+end
