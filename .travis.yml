@@ -1,0 +1,11 @@
+dist: bionic
+language: ruby
+rvm:
+  - 2.5.7
+  - 2.6.5
+  - 2.7.0
+before_install:
+  - gem install bundler
+before_script:
+  - "bundle exec appraisal install"
+script: "bundle exec appraisal rake test integration"
