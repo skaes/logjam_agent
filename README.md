@@ -10,6 +10,9 @@ Has experimental support for Sinatra.
 Currently only one mechanism is available for data transport:
 ZeroMQ. Support for AMQP has been dropped.
 
+[![Travis](https://travis-ci.org/skaes/logjam_agent.svg?branch=master)](https://travis-ci.org/github/skaes/logjam_agent)
+
+
 ## Usage
 
 For ZeroMQ, add
