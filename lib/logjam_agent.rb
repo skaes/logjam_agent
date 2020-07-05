@@ -98,6 +98,9 @@ module LogjamAgent
   mattr_accessor :disabled
   self.disabled = false
 
+  mattr_accessor :ensure_ping_at_exit
+  self.ensure_ping_at_exit = true
+
   mattr_accessor :obfuscate_ips
   self.obfuscate_ips = false
 

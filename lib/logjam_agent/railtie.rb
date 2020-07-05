@@ -80,6 +80,9 @@ module LogjamAgent
       # disable logjam request forwarding by default in test environment
       LogjamAgent.disable! if Rails.env.test?
 
+      # only sent pings in production like environments
+      LogjamAgent.ensure_ping_at_exit = !%w(test development).include?(Rails.env.to_s)
+
       # patch controller testing to create a logjam request, because middlewares aren't executed
       if Rails.env.test?
         ActiveSupport.on_load(:action_controller) do

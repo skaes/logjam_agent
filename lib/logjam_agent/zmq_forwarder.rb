@@ -53,7 +53,12 @@ module LogjamAgent
     def socket
       return @socket if @socket
       @socket = self.class.context.socket(ZMQ::DEALER)
-      ensure_ping_at_exit
+      raise "ZMQ error on socket creation: #{ZMQ::Util.error_string}" if @socket.nil?
+      if LogjamAgent.ensure_ping_at_exit
+        ensure_ping_at_exit
+      else
+        at_exit { reset }
+      end
       @socket.setsockopt(ZMQ::LINGER, @config[:linger])
       @socket.setsockopt(ZMQ::SNDHWM, @config[:snd_hwm])
       @socket.setsockopt(ZMQ::RCVHWM, @config[:rcv_hwm])
@@ -98,8 +103,9 @@ module LogjamAgent
       info = pack_info(@sequence = next_fixnum(@sequence))
       parts = [app_env, key, data, info]
       if socket.send_strings(parts, ZMQ::DONTWAIT) < 0
+        error = ZMQ::Util.error_string
         reset if connection_specs.size > 1
-        raise "ZMQ error on publishing: #{ZMQ::Util.error_string}"
+        raise "ZMQ error on publishing: #{error}"
       end
     end
 
