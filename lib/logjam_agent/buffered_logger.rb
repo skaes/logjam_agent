@@ -1,54 +1,31 @@
 require 'fileutils'
 
-if ActiveSupport::VERSION::STRING < "4.0"
-  require 'active_support/buffered_logger'
-  require 'active_support/core_ext/logger'
-  if ActiveSupport::VERSION::STRING >= "3.2"
-    require 'active_support/tagged_logging'
-    # monkey patch to handle exceptions correctly
-    # not needed for rails 4 as this uses a Formatter to add the tags
-    class ActiveSupport::TaggedLogging
-      def initialize(logger)
-        @logger = logger
-        if logger.is_a?(LogjamAgent::BufferedLogger)
-          self.class.class_eval <<-EVAL, __FILE__, __LINE__ + 1
-            def add(severity, message = nil, progname = nil, &block)
-              @logger.add(severity, message, progname, tags_text, &block)
-            end
-          EVAL
-        end
-      end
-    end
-  end
-else
-  require 'active_support/logger'
+require 'active_support/logger'
 
-  class LogjamAgent::ConsoleFormatter < Logger::Formatter
-    # This method is invoked when a log event occurs
-    def call(severity, timestamp, progname, msg)
-      "[#{format_time(timestamp)}] #{String === msg ? msg : msg.inspect}\n"
-    end
-
-    def format_time(timestamp)
-      timestamp.strftime("%H:%M:%S.#{"%06d" % timestamp.usec}")
-    end
+class LogjamAgent::ConsoleFormatter < Logger::Formatter
+  # This method is invoked when a log event occurs
+  def call(severity, timestamp, progname, msg)
+    "[#{format_time(timestamp)}] #{String === msg ? msg : msg.inspect}\n"
   end
 
-  class ActiveSupport::Logger
-    class << self
-      alias_method :original_broadcast, :broadcast
-      def broadcast(logger)
-        logger.formatter = LogjamAgent::ConsoleFormatter.new
-        logger.formatter.extend(ActiveSupport::TaggedLogging::Formatter)
-        original_broadcast(logger)
-      end
+  def format_time(timestamp)
+    timestamp.strftime("%H:%M:%S.#{"%06d" % timestamp.usec}")
+  end
+end
+
+class ActiveSupport::Logger
+  class << self
+    alias_method :original_broadcast, :broadcast
+    def broadcast(logger)
+      logger.formatter = LogjamAgent::ConsoleFormatter.new
+      logger.formatter.extend(ActiveSupport::TaggedLogging::Formatter)
+      original_broadcast(logger)
     end
   end
 end
 
 module LogjamAgent
-  class BufferedLogger < ( ActiveSupport::VERSION::STRING < "4.0" ?
-                           ActiveSupport::BufferedLogger : ActiveSupport::Logger )
+  class BufferedLogger < ActiveSupport::Logger
 
     attr_accessor :formatter
 
@@ -57,8 +34,6 @@ module LogjamAgent
 
     def initialize(*args)
       super(*args)
-      # stupid bug in the buffered logger code (Rails::VERSION::STRING < "3.2")
-      @log.write "\n" if @log && respond_to?(:buffer)
       @formatter = lambda{|_, _, _, message| message}
     end
 
