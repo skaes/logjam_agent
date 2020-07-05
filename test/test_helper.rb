@@ -10,6 +10,7 @@ end
 
 $:.unshift File.expand_path('../../lib', __FILE__)
 require "logjam_agent"
+require "logjam_agent/receiver"
 
 # for Sinatra
 ENV['RACK_ENV'] = "test"

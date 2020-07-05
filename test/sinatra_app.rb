@@ -14,17 +14,9 @@ class SinatraTestApp < Sinatra::Base
     setup_logjam_logger
 
     LogjamAgent.application_name = "myapp"
-    LogjamAgent.add_forwarder(
-      :zmq,
-      :host => "localhost",
-      :port => 9604,
-      :linger     => 10,
-      :snd_hwm    => 10,
-      :rcv_hwm    => 10,
-      :rcv_timeo  => 10,
-      :snd_timeo  => 10
-    )
+    LogjamAgent.add_forwarder(:zmq, :host => "inproc://app")
     LogjamAgent.parameter_filters << :password
+    LogjamAgent.ensure_ping_at_exit = false
   end
 
   before '/index' do

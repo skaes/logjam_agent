@@ -5,3 +5,4 @@ pkg/*
 .rvmrc
 log/*
 /railsapp/tmp/*
+railsapp/.byebug_history
