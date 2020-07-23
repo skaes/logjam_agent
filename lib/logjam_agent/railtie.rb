@@ -90,9 +90,9 @@ module LogjamAgent
           # Rails 5 fires on_load events multiple times, so we need to protect against endless recursion
           next if ActionController::TestCase::Behavior.instance_methods.include?(:process_without_logjam)
           module ActionController::TestCase::Behavior
-            def process_with_logjam(*args)
+            def process_with_logjam(*args, **kwargs)
               LogjamAgent.start_request
-              process_without_logjam(*args)
+              process_without_logjam(*args, **kwargs)
             ensure
               LogjamAgent.finish_request
             end
