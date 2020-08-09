@@ -16,6 +16,7 @@ module LogjamAgent
       @sequence = SEQUENCE_START
       @socket = nil
       @ping_ensured = false
+      @socket_mutex = Mutex.new
     end
 
     def connection_specs
@@ -35,11 +36,11 @@ module LogjamAgent
       }
     end
 
-    @@mutex = Mutex.new
+    @@context_mutex = Mutex.new
     @@zmq_context = nil
 
     def self.context
-      @@mutex.synchronize do
+      @@context_mutex.synchronize do
         @@zmq_context ||=
           begin
             require 'ffi-rzmq'
@@ -50,6 +51,43 @@ module LogjamAgent
       end
     end
 
+    def reset
+      @socket_mutex.synchronize do
+        if @socket
+          @socket.close
+          @socket = nil
+        end
+      end
+    end
+
+    def ensure_ping_at_exit
+      return if @ping_ensured
+      at_exit { ping; reset }
+      @ping_ensured = true
+    end
+
+    def forward(data, options={})
+      app_env = options[:app_env] || @app_env
+      key = options[:routing_key] || "logs.#{app_env.sub('-','.')}"
+      if engine = options[:engine]
+        key += ".#{engine}"
+      end
+      msg = LogjamAgent.encode_payload(data)
+      @socket_mutex.synchronize do
+        if options[:sync]
+          send_receive(app_env, key, msg)
+        else
+          publish(app_env, key, msg)
+        end
+      end
+    rescue => error
+      reraise_expectation_errors!
+      raise ForwardingError.new(error.message)
+    end
+
+    private
+
+    # this method assumes the caller holds the socket mutex
     def socket
       return @socket if @socket
       @socket = self.class.context.socket(ZMQ::DEALER)
@@ -69,36 +107,6 @@ module LogjamAgent
       @socket
     end
 
-    def reset
-      if @socket
-        @socket.close
-        @socket = nil
-      end
-    end
-
-    def ensure_ping_at_exit
-      return if @ping_ensured
-      at_exit { ping; reset }
-      @ping_ensured = true
-    end
-
-    def forward(data, options={})
-      app_env = options[:app_env] || @app_env
-      key = options[:routing_key] || "logs.#{app_env.sub('-','.')}"
-      if engine = options[:engine]
-        key += ".#{engine}"
-      end
-      msg = LogjamAgent.encode_payload(data)
-      if options[:sync]
-        send_receive(app_env, key, msg)
-      else
-        publish(app_env, key, msg)
-      end
-    rescue => error
-      reraise_expectation_errors!
-      raise ForwardingError.new(error.message)
-    end
-
     def publish(app_env, key, data)
       info = pack_info(@sequence = next_fixnum(@sequence))
       parts = [app_env, key, data, info]
@@ -108,8 +116,6 @@ module LogjamAgent
         raise "ZMQ error on publishing: #{error}"
       end
     end
-
-    private
 
     def log_warning(message)
       LogjamAgent.error_handler.call ForwardingWarning.new(message)
@@ -138,8 +144,10 @@ module LogjamAgent
     end
 
     def ping
-      if @socket && !send_receive("ping", @app_env, "{}", NO_COMPRESSION)
-        log_warning "failed to receive pong"
+      @socket_mutex.synchronize do
+        if @socket && !send_receive("ping", @app_env, "{}", NO_COMPRESSION)
+          log_warning "failed to receive pong"
+        end
       end
     end
 
