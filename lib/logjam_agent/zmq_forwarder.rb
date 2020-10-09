@@ -53,10 +53,7 @@ module LogjamAgent
 
     def reset
       @socket_mutex.synchronize do
-        if @socket
-          @socket.close
-          @socket = nil
-        end
+        reset_without_locking
       end
     end
 
@@ -86,6 +83,13 @@ module LogjamAgent
     end
 
     private
+
+    def reset_without_locking
+      if @socket
+        @socket.close
+        @socket = nil
+      end
+    end
 
     # this method assumes the caller holds the socket mutex
     def socket
@@ -129,12 +133,12 @@ module LogjamAgent
       answer_parts = []
       if socket.send_strings(request_parts) < 0
         log_warning "ZMQ error on sending: #{ZMQ::Util.error_string}"
-        reset
+        reset_without_locking
         return nil
       end
       if socket.recv_strings(answer_parts) < 0
         log_warning "ZMQ error on receiving: #{ZMQ::Util.error_string}"
-        reset
+        reset_without_locking
         return nil
       end
       if answer_parts.first != "" || !VALID_RESPONSE_CODES.include?(answer_parts.second.to_s.to_i)
