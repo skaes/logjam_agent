@@ -1,5 +1,6 @@
 require "socket"
 require "time_bandits"
+require "logjam_agent/monkey_patches/ffi-rzmq-patch"
 
 module LogjamAgent
   module RequestHandling
