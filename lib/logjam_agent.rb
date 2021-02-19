@@ -77,12 +77,9 @@ module LogjamAgent
   self.parameter_filters = []
 
   def self.get_hostname
-    n = Socket.gethostname
-    if n.split('.').size > 1
-      n
-    else
-      Socket.gethostbyname(n).first rescue n
-    end
+    name = Socket.gethostname
+    host = name.split('.').first
+    Addrinfo.getaddrinfo(host, nil, nil, :STREAM, nil, Socket::AI_CANONNAME).first.canonname rescue name
   end
 
   mattr_accessor :hostname
