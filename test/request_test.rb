@@ -44,6 +44,16 @@ module LogjamAgent
       assert_equal TRUNCATED_LINE, lines(@request)[1][2]
     end
 
+    def test_sets_trace_id_to_request_id_if_not_passed_in
+      assert_equal @request.uuid, @request.fields[:trace_id]
+    end
+
+    def test_sets_trace_id_to_passed_in_field_value
+      trace_id = "murks"
+      request = Request.new("app", "env", {trace_id: trace_id})
+      assert_equal trace_id, request.fields[:trace_id]
+    end
+
     private
 
     def lines(request)

@@ -17,6 +17,7 @@ module LogjamAgent
       @uuid = LogjamAgent.generate_uuid
       @fields = initial_fields.merge(:request_id => @uuid, :host => LogjamAgent.hostname,
                                      :process_id => Process.pid, :lines => @lines)
+      @fields[:trace_id] ||= @uuid
       unless (revision = LogjamAgent.application_revision).blank?
         @fields[:revision] = revision
       end
@@ -68,6 +69,10 @@ module LogjamAgent
 
     def caller_action
       @fields[:caller_action]
+    end
+
+    def trace_id
+      @fields[:trace_id]
     end
 
     def add_line(severity, timestamp, message)
