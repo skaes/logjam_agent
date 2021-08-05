@@ -1,6 +1,7 @@
 [
-  "5.2.4.3",
-  "6.0.3.2"
+  "5.2.6",
+  "6.0.4",
+  "6.1.4"
 ].each do |rails_version|
   appraise "rails-#{rails_version}" do
     gem "rails", rails_version
