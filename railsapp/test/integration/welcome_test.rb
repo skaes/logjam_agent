@@ -24,8 +24,8 @@ class WelcomeTest < ActionDispatch::IntegrationTest
     assert_kind_of String, payload["ip"]
     assert_kind_of Float, payload["view_time"]
     lines = payload["lines"]
-    puts "Rails::VERSION::STRING: #{Rails::VERSION::STRING}"
-    lines.each{|l|puts l[2]}
+    # puts "Rails::VERSION::STRING: #{Rails::VERSION::STRING}"
+    # lines.each{|l|puts l[2]}
     assert_match(/Started GET "\/\?password=\[FILTERED\]"/, lines[0][2])
     assert_match(/Processing by WelcomeController#index/, lines[1][2])
     assert_match(/Parameters.*{"password"=>"\[FILTERED\]"/, lines[2][2])
