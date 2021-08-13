@@ -23,6 +23,7 @@ class WelcomeTest < ActionDispatch::IntegrationTest
     assert_kind_of Integer, payload["started_ms"]
     assert_kind_of String, payload["ip"]
     assert_kind_of Float, payload["view_time"]
+    assert_kind_of String, payload["trace_id"]
     lines = payload["lines"]
     # puts "Rails::VERSION::STRING: #{Rails::VERSION::STRING}"
     # lines.each{|l|puts l[2]}
@@ -64,6 +65,25 @@ class WelcomeTest < ActionDispatch::IntegrationTest
     assert_equal method, "GET"
     assert_equal url, "/?raise=1"
     assert_equal(query_parameters, { "raise" => "1" })
+  end
+
+  test "forwards trace id and caller fields to logjam" do
+    trace_id = LogjamAgent.generate_uuid
+    caller_id = "foo-bar-123"
+    caller_action = "MayController#index"
+    get "/?password=bamf", headers: {
+          "HTTP_X_LOGJAM_TRACE_ID" => trace_id,
+          "HTTP_X_LOGJAM_CALLER_ID" => caller_id,
+          "HTTP_X_LOGJAM_ACTION" => caller_action,
+        }
+    assert_response :success
+  ensure
+    stream, topic, payload = logjam_message
+    assert_equal "railsapp-test", stream
+    assert_equal "logs.railsapp.test", topic
+    assert_equal trace_id, payload["trace_id"]
+    assert_equal caller_id, payload["caller_id"]
+    assert_equal caller_action, payload["caller_action"]
   end
 
 end
