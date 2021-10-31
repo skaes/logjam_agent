@@ -11,7 +11,7 @@ Currently only one mechanism is available for data transport:
 ZeroMQ. Support for AMQP has been dropped.
 
 
-![Test Results](https://github.com/skaes/logjam_agent/actions/workflows/run-tests.yml/badge.svg)
+![Build](https://github.com/skaes/logjam_agent/actions/workflows/run-tests.yml/badge.svg)
 
 [![Travis](https://travis-ci.org/skaes/logjam_agent.svg?branch=master)](https://travis-ci.org/github/skaes/logjam_agent)
 
