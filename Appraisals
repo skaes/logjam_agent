@@ -3,6 +3,7 @@ appraisals = [
   "6.1.4.4",
 ]
 
+appraisals.delete("6.0.4.4") if Gem::Version.new(RUBY_VERSION) >= Gem::Version.new("3.1.0")
 appraisals.insert(0, "5.2.6") if Gem::Version.new(RUBY_VERSION) < Gem::Version.new("3.0.0")
 appraisals << "7.0.1" if Gem::Version.new(RUBY_VERSION) >= Gem::Version.new("2.7.0")
 
