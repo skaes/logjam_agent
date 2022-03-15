@@ -48,7 +48,7 @@ module LogjamAgent
         else
           wait_time_ms = 0.0
         end
-        before_dispatch(request, env, start_time)
+        before_dispatch(request, env, start_time, wait_time_ms)
         result = @app.call(env)
       rescue ActionDispatch::RemoteIp::IpSpoofAttackError
         result = [403, {}, ['Forbidden']]
@@ -78,7 +78,7 @@ module LogjamAgent
         false
       end
 
-      def before_dispatch(request, env, start_time)
+      def before_dispatch(request, env, start_time, wait_time_ms)
         logger.formatter.reset_attributes if logger.formatter.respond_to?(:reset_attributes)
         TimeBandits.reset
         Thread.current.thread_variable_set(:time_bandits_completed_info, nil)
@@ -99,6 +99,7 @@ module LogjamAgent
         end
         logjam_fields.merge!(:ip => ip, :host => @hostname)
         logjam_fields.merge!(extract_request_info(request))
+        logjam_fields.merge!(:wait_time_ms => wait_time_ms)
 
         info "Started #{request.request_method} \"#{path}\" for #{ip} at #{start_time.to_default_s}" unless logjam_request.ignored?
         if spoofed
