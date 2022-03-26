@@ -37,6 +37,7 @@ module LogjamAgent
       assert_kind_of String, payload["started_at"]
       assert_kind_of Integer, payload["started_ms"]
       assert_kind_of String, payload["ip"]
+      assert_nil payload["wait_time"]
       # assert_kind_of Float, payload["view_time"]
       lines = payload["lines"]
       assert_match(/Started GET.*password=\[FILTERED\]/, lines[0][2])

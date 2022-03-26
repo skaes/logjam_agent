@@ -32,29 +32,36 @@ module LogjamAgent
 
       def call_app(request, env)
         start_time = Time.now
-        start_time_header = env['HTTP_X_STARTTIME']
-        if start_time_header
-          if start_time_header =~ /\At=(\d+)\z/
-            # HTTP_X_STARTTIME is microseconds since the epoch (UTC)
-            http_start_time = Time.at($1.to_f / 1_000_000.0)
-          elsif start_time_header =~ /\Ats=(\d+)(?:\.(\d+))?\z/
-            # HTTP_X_STARTTIME is seconds since the epoch (UTC) with a milliseconds resolution
-            http_start_time = Time.at($1.to_f + $2.to_f / 1000)
-          end
-
-          if http_start_time && (wait_time_ms = (start_time - http_start_time) * 1000) > 0
+        wait_time_ms = 0.0
+        if http_start_time = extract_http_start_time(env)
+          wait_time_ms = (start_time - http_start_time) * 1000
+          if wait_time_ms > 0
             start_time = http_start_time
+          else
+            wait_time_ms = 0.0
           end
-        else
-          wait_time_ms = 0.0
         end
-        before_dispatch(request, env, start_time)
+        before_dispatch(request, env, start_time, wait_time_ms)
         result = @app.call(env)
       rescue ActionDispatch::RemoteIp::IpSpoofAttackError
         result = [403, {}, ['Forbidden']]
       ensure
         run_time_ms = (Time.now - start_time) * 1000
         after_dispatch(env, result, run_time_ms, wait_time_ms)
+      end
+
+      def extract_http_start_time(env)
+        start_time_header = env['HTTP_X_STARTTIME']
+        if start_time_header
+          if start_time_header =~ /\At=(\d+)\z/
+            # HTTP_X_STARTTIME is microseconds since the epoch (UTC)
+            return Time.at($1.to_f / 1_000_000.0)
+          elsif start_time_header =~ /\Ats=(\d+)(?:\.(\d+))?\z/
+            # HTTP_X_STARTTIME is seconds since the epoch (UTC) with a milliseconds resolution
+            return Time.at($1.to_f + $2.to_f / 1000)
+          end
+        end
+        return nil
       end
 
       def compute_tags(request)
@@ -78,7 +85,7 @@ module LogjamAgent
         false
       end
 
-      def before_dispatch(request, env, start_time)
+      def before_dispatch(request, env, start_time, wait_time_ms)
         logger.formatter.reset_attributes if logger.formatter.respond_to?(:reset_attributes)
         TimeBandits.reset
         Thread.current.thread_variable_set(:time_bandits_completed_info, nil)
@@ -90,6 +97,7 @@ module LogjamAgent
 
         logjam_request.start_time = start_time
         logjam_fields = logjam_request.fields
+        logjam_fields[:wait_time] = wait_time_ms if wait_time_ms > 0.0
         spoofed = nil
         ip = nil
         begin
@@ -125,7 +133,6 @@ module LogjamAgent
 
         if wait_time_ms < 0
           warn LogjamAgent::NegativeWaitTime.new("#{wait_time_ms} ms")
-          wait_time_ms = 0.0
         end
 
         message = "Completed #{status} #{::Rack::Utils::HTTP_STATUS_CODES[status]} in %.1fms" % run_time_ms
@@ -135,7 +142,6 @@ module LogjamAgent
         ActiveSupport::LogSubscriber.flush_all!
         request_info = { :total_time => run_time_ms, :code => status }
         request_info[:view_time] = view_time if view_time
-        request_info[:wait_time] = wait_time_ms if wait_time_ms > 0
         logjam_request.fields.merge!(request_info)
 
         env["time_bandits.metrics"] = TimeBandits.metrics
