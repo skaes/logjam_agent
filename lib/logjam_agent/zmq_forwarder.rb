@@ -144,7 +144,7 @@ module LogjamAgent
         reset_without_locking
         return nil
       end
-      if answer_parts.first != "" || !VALID_RESPONSE_CODES.include?(answer_parts.second.to_s.to_i)
+      if answer_parts.first != app_env || !VALID_RESPONSE_CODES.include?(answer_parts.second.to_s.to_i)
         log_warning "unexpected answer from logjam broker: #{answer_parts.inspect}"
       end
       answer_parts.second
