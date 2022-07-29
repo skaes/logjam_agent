@@ -45,7 +45,8 @@ module LogjamAgent
           begin
             require 'ffi-rzmq'
             context = ZMQ::Context.new(1)
-            at_exit { context.terminate }
+            pid = Process.pid
+            at_exit { context.terminate if Process.pid == pid }
             context
           end
       end
@@ -59,7 +60,8 @@ module LogjamAgent
 
     def ensure_ping_at_exit
       return if @ping_ensured
-      at_exit { ping; reset }
+      pid = Process.pid
+      at_exit { (ping; reset) if Process.pid == pid }
       @ping_ensured = true
     end
 
@@ -99,7 +101,8 @@ module LogjamAgent
       if LogjamAgent.ensure_ping_at_exit
         ensure_ping_at_exit
       else
-        at_exit { reset }
+        pid = Process.pid
+        at_exit { reset if Process.pid == pid}
       end
       @socket.setsockopt(ZMQ::LINGER, @config[:linger])
       @socket.setsockopt(ZMQ::SNDHWM, @config[:snd_hwm])
