@@ -8,9 +8,9 @@ module LogjamAgent
   autoload :Middleware, 'logjam_agent/middleware'
 
   class Railtie < Rails::Railtie
+
     def logjam_log_path(app)
-      paths = app.config.paths
-      (Rails::VERSION::STRING < "3.1" ? paths.log.to_a : paths['log']).first.to_s
+      app.config.paths['log'].first.to_s
     end
 
     initializer "initialize_logjam_agent_logger", :before => :initialize_logger do |app|
@@ -18,27 +18,21 @@ module LogjamAgent
         begin
           path = ENV["RAILS_LOG_TO_STDOUT"].present? ? STDOUT : logjam_log_path(app)
           logger = LogjamAgent::BufferedLogger.new(path)
+          logger.formatter = LogjamAgent::SyslogLikeFormatter.new
+          logger = ActiveSupport::TaggedLogging.new(logger)
           logger.level = ::Logger.const_get(app.config.log_level.to_s.upcase)
           LogjamAgent.log_device_log_level = logger.level
-          logger.formatter = LogjamAgent::SyslogLikeFormatter.new
-          logger.auto_flushing = false if Rails.env.production? && Rails::VERSION::STRING < "3.2"
-          logger = ActiveSupport::TaggedLogging.new(logger) if Rails::VERSION::STRING >= "3.2"
           LogjamAgent.logger = logger
-          logger
         rescue StandardError
           logger = LogjamAgent::BufferedLogger.new(STDERR)
-          logger = ActiveSupport::TaggedLogging.new(logger) if Rails::VERSION::STRING >= "3.2"
-          LogjamAgent.logger = logger
+          logger = ActiveSupport::TaggedLogging.new(logger)
           logger.level = ::Logger::WARN
           logger.warn(
-                      "Logging Error: Unable to access log file. Please ensure that #{path} exists and is writable. " +
-                      "The log level has been raised to WARN and the output directed to STDERR until the problem is fixed."
-                      )
-          logger
+            "Logging Error: Unable to access log file. Please ensure that #{path} exists and is writable. " +
+            "The log level has been raised to WARN and the output directed to STDERR until the problem is fixed."
+          )
+          LogjamAgent.logger = logger
         end
-      if Rails::VERSION::STRING < "3.2"
-        at_exit { Rails.logger.flush if Rails.logger.respond_to?(:flush) }
-      end
     end
 
     initializer "logjam_agent", :after => "time_bandits" do |app|

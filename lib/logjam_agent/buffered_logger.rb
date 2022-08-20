@@ -57,14 +57,7 @@ module LogjamAgent
       time = Time.now
       if log_to_log_device
         formatted_message = formatter.call(severity, time, progname, message)
-        if respond_to?(:buffer)
-          buffer <<  formatted_message << "\n"
-          auto_flush
-        elsif @log # @log is a logger (or nil for rails 4)
-          @log << "#{formatted_message}\n"
-        elsif @logdev
-          @logdev.write(formatted_message)
-        end
+        @logdev.write(formatted_message)
       end
       request.add_line(severity, time, message) if request
       message
@@ -72,14 +65,8 @@ module LogjamAgent
 
     def logdev=(log_device)
       raise "cannot connect logger to new log device" unless log_device.respond_to?(:write)
-      if respond_to?(:buffer)
-        @log = log_device
-      else
-        (@log||self).instance_eval do
-          raise "cannot set log device" unless defined?(@logdev)
-          @logdev = log_device
-        end
-      end
+      raise "cannot set log device" unless defined?(@logdev)
+      @logdev = log_device
     end
 
     private
