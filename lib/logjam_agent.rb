@@ -41,8 +41,8 @@ require "logjam_agent/zmq_forwarder"
 require "logjam_agent/forwarders"
 require "logjam_agent/request"
 require "logjam_agent/buffered_logger"
+require "logjam_agent/logging_attributes"
 require "logjam_agent/syslog_like_formatter"
-
 require "logjam_agent/railtie" if defined?(Rails::Railtie)
 
 module LogjamAgent

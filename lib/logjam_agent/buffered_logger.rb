@@ -27,17 +27,21 @@ end
 module LogjamAgent
   class BufferedLogger < ActiveSupport::Logger
 
-    attr_accessor :formatter
-
     # for backwards compatibility. needs to go away.
     include LogjamAgent::RequestHandling
 
     def initialize(*args)
       super(*args)
-      @formatter = lambda{|_, _, _, message| message}
+      # make sure we always have a formatter
+      self.formatter = Logger::Formatter.new
     end
 
-    def add(severity, message = nil, progname = nil, tags_text = nil, &block)
+    def formatter=(formatter)
+      super
+      @formatter.extend LoggingAttributes
+    end
+
+    def add(severity, message = nil, progname = nil, &block)
       return if level > severity
       message = progname if message.nil?
       progname = nil
@@ -53,7 +57,8 @@ module LogjamAgent
         end
       end
       log_to_log_device = LogjamAgent.log_to_log_device?(severity, message)
-      message = "#{tags_text}#{message}" unless tags_text.blank?
+      attributes = formatter.render_attributes
+      message = "[#{attributes}] #{message}" if attributes
       time = Time.now
       if log_to_log_device
         formatted_message = formatter.call(format_severity(severity), time, progname, message)

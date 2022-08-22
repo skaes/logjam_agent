@@ -18,7 +18,7 @@ module LogjamAgent
         begin
           path = ENV["RAILS_LOG_TO_STDOUT"].present? ? STDOUT : logjam_log_path(app)
           logger = LogjamAgent::BufferedLogger.new(path)
-          logger.formatter = LogjamAgent::SyslogLikeFormatter.new
+          logger.formatter = app.config.log_formatter || LogjamAgent::SyslogLikeFormatter.new
           logger = ActiveSupport::TaggedLogging.new(logger)
           logger.level = ::Logger.const_get(app.config.log_level.to_s.upcase)
           LogjamAgent.log_device_log_level = logger.level
