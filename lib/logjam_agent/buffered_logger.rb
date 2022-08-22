@@ -56,7 +56,7 @@ module LogjamAgent
       message = "#{tags_text}#{message}" unless tags_text.blank?
       time = Time.now
       if log_to_log_device
-        formatted_message = formatter.call(severity, time, progname, message)
+        formatted_message = formatter.call(format_severity(severity), time, progname, message)
         @logdev.write(formatted_message)
       end
       request.add_line(severity, time, message) if request
@@ -70,6 +70,16 @@ module LogjamAgent
     end
 
     private
+
+    SEV_LABEL_CACHE = SEV_LABEL.map{|sev| "%-5s" % sev}
+
+    def format_severity(severity)
+      if severity.is_a?(String)
+        "%-5s" % severity
+      else
+        SEV_LABEL_CACHE[severity] || 'ALIEN'
+      end
+    end
 
     def detect_logged_exception(message)
       (matcher = LogjamAgent.exception_matcher) && message[matcher]

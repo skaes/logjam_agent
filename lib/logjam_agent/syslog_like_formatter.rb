@@ -18,16 +18,6 @@ module LogjamAgent
       attributes
     end
 
-    SEV_LABEL = Logger::SEV_LABEL.map{|sev| "%-5s" % sev}
-
-    def format_severity(severity)
-      if severity.is_a?(String)
-        "%-5s" % severity
-      else
-        SEV_LABEL[severity] || 'ALIEN'
-      end
-    end
-
     def format_time(timestamp)
       timestamp.strftime("%b %d %H:%M:%S.#{"%06d" % timestamp.usec}")
     end
@@ -37,7 +27,7 @@ module LogjamAgent
     end
 
     def call(severity, timestamp, progname, msg)
-      "#{format_severity(severity)} #{format_time(timestamp)}#{format_host_info(progname)}: #{format_message(msg)}\n"
+      "#{severity} #{format_time(timestamp)}#{format_host_info(progname)}: #{format_message(msg)}\n"
     end
 
     if !defined?(Rails::Railtie) || Rails.env.development?

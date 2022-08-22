@@ -2,6 +2,12 @@ require "socket"
 require "time_bandits"
 require "logjam_agent/monkey_patches/ffi-rzmq-patch"
 
+# monkey patch log levels to include NONE
+require "logger"
+module Logger::Severity
+  NONE = UNKNOWN + 1
+end
+
 module LogjamAgent
   module RequestHandling
     def request
@@ -38,12 +44,6 @@ require "logjam_agent/buffered_logger"
 require "logjam_agent/syslog_like_formatter"
 
 require "logjam_agent/railtie" if defined?(Rails::Railtie)
-
-# monkey patch log levels to include NONE
-require 'logger'
-module Logger::Severity
-  NONE = UNKNOWN + 1
-end
 
 module LogjamAgent
 
