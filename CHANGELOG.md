@@ -1,6 +1,9 @@
 # CHANGELOG
 
 ## Version 0.34.0
+* make Sinatra log formatter configurable and default it Ruby default one
+
+## Version 0.34.0
 * supports arbitrary log formatters, including the Ruby default one
 * drops support for Rails versions before 5.2
 
