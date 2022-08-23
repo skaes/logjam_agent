@@ -38,7 +38,7 @@ module LogjamAgent
       LogjamAgent.log_device_log_level = logger.level
       LogjamAgent.log_device_log_level = ::Logger::ERROR unless %i[test development].include?(settings.environment.to_sym)
 
-      logger.formatter = LogjamAgent::SyslogLikeFormatter.new
+      logger.formatter = settings.respond_to?(:logformatter) ? settings.logformatter : Logger::Formatter.new
       logger = ActiveSupport::TaggedLogging.new(logger)
       LogjamAgent.logger = logger
       ActiveSupport::LogSubscriber.logger = logger
