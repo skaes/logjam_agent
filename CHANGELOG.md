@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## Version 0.34.0
+* supports arbitrary log formatters, including the Ruby default one
+* drops support for Rails versions before 5.2
+
 ## Version 0.33.3
 * don't log an error when the response to a sync message is correct
 
