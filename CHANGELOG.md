@@ -1,7 +1,10 @@
 # CHANGELOG
 
-## Version 0.34.0
-* make Sinatra log formatter configurable and default it Ruby default one
+## Version 0.34.2
+* use monotonic clocks to measure request runtime
+
+## Version 0.34.1
+* make Sinatra log formatter configurable and default it to the Ruby default one
 
 ## Version 0.34.0
 * supports arbitrary log formatters, including the Ruby default one
