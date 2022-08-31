@@ -32,21 +32,24 @@ module LogjamAgent
 
       def call_app(request, env)
         start_time = Time.now
-        wait_time_ms = 0.0
+        start_clock = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+        wait_time = 0.0
         if http_start_time = extract_http_start_time(env)
-          wait_time_ms = (start_time - http_start_time) * 1000
-          if wait_time_ms > 0
+          wait_time = start_time - http_start_time
+          if wait_time > 0
             start_time = http_start_time
           else
-            wait_time_ms = 0.0
+            wait_time = 0.0
           end
         end
+        wait_time_ms =  wait_time * 1000
         before_dispatch(request, env, start_time, wait_time_ms)
         result = @app.call(env)
       rescue ActionDispatch::RemoteIp::IpSpoofAttackError
         result = [403, {}, ['Forbidden']]
       ensure
-        run_time_ms = (Time.now - start_time) * 1000
+        end_clock = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+        run_time_ms = (end_clock - start_clock + wait_time) * 1000
         after_dispatch(env, result, run_time_ms, wait_time_ms)
       end
 
