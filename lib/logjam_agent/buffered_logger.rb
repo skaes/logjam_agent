@@ -62,7 +62,7 @@ module LogjamAgent
       time = Time.now
       if log_to_log_device
         formatted_message = formatter.call(format_severity(severity), time, progname, message)
-        @logdev.write(formatted_message)
+        @logdev.write(formatted_message) if @logdev
       end
       request.add_line(severity, time, message) if request
       message
@@ -70,7 +70,6 @@ module LogjamAgent
 
     def logdev=(log_device)
       raise "cannot connect logger to new log device" unless log_device.respond_to?(:write)
-      raise "cannot set log device" unless defined?(@logdev)
       @logdev = log_device
     end
 
