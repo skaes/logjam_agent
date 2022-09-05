@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## Version 0.34.3
+* Fixed that loggers without log device crashed the agent
+
 ## Version 0.34.2
 * use monotonic clocks to measure request runtime
 
