@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## Version 0.35.1
+* Allow selective logging to be globally disabled. Useful for
+  development.
+
 ## Version 0.35.0
 * Added selective logging
 
