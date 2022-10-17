@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## Version 0.35.0
+* Added selective logging
+
 ## Version 0.34.3
 * Fixed that loggers without log device crashed the agent
 
