@@ -2,9 +2,12 @@ module LogjamAgent
   module SelectiveLogging
     extend self
 
+    mattr_accessor :selective_logging_enabled
+    self.selective_logging_enabled = true
+
     def logjam_only
       old_selector = logjam_log_selector
-      self.logjam_log_selector = :logjam_only
+      self.logjam_log_selector = :logjam_only if selective_logging_enabled
       yield
     ensure
       self.logjam_log_selector = old_selector
@@ -12,7 +15,7 @@ module LogjamAgent
 
     def logdevice_only
       old_selector = logjam_log_selector
-      self.logjam_log_selector = :logdevice_only
+      self.logjam_log_selector = :logdevice_only  if selective_logging_enabled
       yield
     ensure
       self.logjam_log_selector = old_selector
