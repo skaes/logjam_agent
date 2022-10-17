@@ -60,11 +60,11 @@ module LogjamAgent
       attributes = formatter.render_attributes
       message = "[#{attributes}] #{message}" if attributes
       time = Time.now
-      if log_to_log_device
+      if log_to_log_device && !SelectiveLogging.logjam_only?
         formatted_message = formatter.call(format_severity(severity), time, progname, message)
         @logdev.write(formatted_message) if @logdev
       end
-      request.add_line(severity, time, message) if request
+      request.add_line(severity, time, message) if request && !SelectiveLogging.logdevice_only?
       message
     end
 

@@ -166,6 +166,16 @@ Sinatra's environment setting.
 Set the environment variable `APP_LOG_TO_STDOUT` if you want to log to `STDOUT`.
 Otherwise, logs will appear in the subdirectory `log` of your application's root.
 
+## Selective Logging
+
+The agent adds log lines to the request information sent via ZMQ on
+the logging bus and also writes log lines to the configured log
+device.
+
+Using one of the logjam helpers `LogjamAgent.logjam_only` or
+`LogjamAgent.logdevice_only` it is possible to send information to
+only one of those log line sinks for the duration of a given block.
+
 
 ## Troubleshooting
 
