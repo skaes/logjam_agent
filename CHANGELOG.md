@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## Version 0.36.0
+* Support suppressing sending data to Logjam and also loggin to the
+  log device via an URL regex pattern list
+  `Logjam.ignored_request_urls`.
+
 ## Version 0.35.1
 * Allow selective logging to be globally disabled
 
