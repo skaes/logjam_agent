@@ -57,6 +57,7 @@ module LogjamAgent
         end
       end
       log_to_log_device = LogjamAgent.log_to_log_device?(severity, message)
+      log_to_log_device = false if request && request.ignored?
       attributes = formatter.render_attributes
       message = "[#{attributes}] #{message}" if attributes
       time = Time.now

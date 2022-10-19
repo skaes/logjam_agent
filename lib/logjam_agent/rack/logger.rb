@@ -11,6 +11,7 @@ module LogjamAgent
         @hostname = LogjamAgent.hostname
         @asset_prefix = Rails.application.config.assets.prefix rescue "---"
         @ignore_asset_requests = LogjamAgent.ignore_asset_requests
+        @ignored_request_urls = LogjamAgent.ignored_request_urls
       end
 
       def call(env)
@@ -88,6 +89,12 @@ module LogjamAgent
         false
       end
 
+      def ignored_request_url?(path)
+        @ignored_request_urls.any?{|url_pattern| path =~ url_pattern}
+      rescue
+        false
+      end
+
       def before_dispatch(request, env, start_time, wait_time_ms)
         logger.formatter.reset_attributes if logger.formatter.respond_to?(:reset_attributes)
         TimeBandits.reset
@@ -96,7 +103,8 @@ module LogjamAgent
         path = request.filtered_path
 
         logjam_request = LogjamAgent.request
-        logjam_request.ignore! if ignored_asset_request?(path)
+        logjam_request.ignore!(:asset) if ignored_asset_request?(path)
+        logjam_request.ignore!(:url) if ignored_request_url?(path)
 
         logjam_request.start_time = start_time
         logjam_fields = logjam_request.fields
@@ -111,7 +119,7 @@ module LogjamAgent
         logjam_fields.merge!(:ip => ip, :host => @hostname)
         logjam_fields.merge!(extract_request_info(request))
 
-        info "Started #{request.request_method} \"#{path}\" for #{ip} at #{start_time.to_default_s}" unless logjam_request.ignored?
+        info "Started #{request.request_method} \"#{path}\" for #{ip} at #{start_time.to_default_s}" unless logjam_request.ignored?(:asset)
         if spoofed
           error spoofed
           raise spoofed
@@ -140,7 +148,7 @@ module LogjamAgent
 
         message = "Completed #{status} #{::Rack::Utils::HTTP_STATUS_CODES[status]} in %.1fms" % run_time_ms
         message << " (#{additions.join(' | ')})" unless additions.blank?
-        info message unless logjam_request.ignored?
+        info message unless logjam_request.ignored?(:asset)
 
         ActiveSupport::LogSubscriber.flush_all!
         request_info = { :total_time => run_time_ms, :code => status }

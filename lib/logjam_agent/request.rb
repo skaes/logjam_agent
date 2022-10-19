@@ -47,12 +47,12 @@ module LogjamAgent
       @fields[:started_ms] = start_time.tv_sec * 1000 + start_time.tv_usec / 1000
     end
 
-    def ignore!
-      @ignored = true
+    def ignore!(reason = nil)
+      @ignored = reason || :unknown
     end
 
-    def ignored?
-      @ignored
+    def ignored?(reason = nil)
+      reason ? @ignored == reason : @ignored
     end
 
     def id

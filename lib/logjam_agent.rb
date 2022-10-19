@@ -133,6 +133,9 @@ module LogjamAgent
   mattr_accessor :exception_matcher
   self.exception_matcher = nil
 
+  mattr_accessor :ignored_request_urls
+  self.ignored_request_urls = []
+
   mattr_accessor :ignore_asset_requests
   self.ignore_asset_requests = false
 

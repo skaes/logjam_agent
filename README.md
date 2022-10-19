@@ -62,6 +62,12 @@ module LogjamAgent
   # to debug asset request handling.
   self.ignore_asset_requests = Rails.env.development?
 
+  # Configure a list of URL patterns for which no data should be sent
+  # to logjam and nothing should be sent to the log device. Please not
+  # that the log lines will still show up in dev mode on the console.
+  # Defaults to the empty list.
+  # self.ignored_request_urls = [%r{/_system/}]
+
   # Disable ActiveSupport::Notifications (and thereby logging) of ActionView
   # render events. Defaults to false.
   # self.ignore_render_events = Rails.env.production?
