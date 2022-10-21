@@ -19,8 +19,10 @@ module ActionController #:nodoc:
       request = LogjamAgent.request
       request.fields[:action] = action_name
 
-      request.log_info.merge!(payload.slice(:action, :controller, :format))
-      request.log_info[:params] = params
+      request.log_info[:action] = action
+      request.log_info[:controller] = controller
+      request.log_info[:format] = format
+      # request.log_info[:params] = params
 
       LogjamAgent.logjam_only do
         info "Processing by #{full_name} as #{format}"
