@@ -106,6 +106,9 @@ module LogjamAgent
         logjam_request.ignore!(:asset) if ignored_asset_request?(path)
         logjam_request.ignore!(:url) if ignored_request_url?(path)
 
+        logjam_request.log_info[:path] = path
+        logjam_request.log_info[:method] = request.method
+
         logjam_request.start_time = start_time
         logjam_fields = logjam_request.fields
         logjam_fields[:wait_time] = wait_time_ms if wait_time_ms > 0.0
@@ -119,7 +122,9 @@ module LogjamAgent
         logjam_fields.merge!(:ip => ip, :host => @hostname)
         logjam_fields.merge!(extract_request_info(request))
 
-        info "Started #{request.request_method} \"#{path}\" for #{ip} at #{start_time.to_default_s}" unless logjam_request.ignored?(:asset)
+        LogjamAgent.logjam_only do
+          info "Started #{request.request_method} \"#{path}\" for #{ip} at #{start_time.to_default_s}" unless logjam_request.ignored?(:asset)
+        end
         if spoofed
           error spoofed
           raise spoofed
@@ -146,9 +151,20 @@ module LogjamAgent
           warn LogjamAgent::NegativeWaitTime.new("#{wait_time_ms} ms")
         end
 
-        message = "Completed #{status} #{::Rack::Utils::HTTP_STATUS_CODES[status]} in %.1fms" % run_time_ms
-        message << " (#{additions.join(' | ')})" unless additions.blank?
-        info message unless logjam_request.ignored?(:asset)
+        http_status = "#{status} #{::Rack::Utils::HTTP_STATUS_CODES[status]}"
+        LogjamAgent.logjam_only do
+          message = "Completed #{http_status} in %.1fms" % run_time_ms
+          message << " (#{additions.join(' | ')})" unless additions.blank?
+          info message unless logjam_request.ignored?(:asset)
+        end
+        if LogjamAgent.selective_logging_enabled
+          LogjamAgent.logdevice_only do
+            logjam_request.log_info[:status] = status
+            logjam_request.log_info[:duration] = run_time_ms
+            logjam_request.log_info[:metrics] = TimeBandits.metrics
+            info "Completed #{http_status} #{logjam_request.log_info.to_json}"
+          end
+        end
 
         ActiveSupport::LogSubscriber.flush_all!
         request_info = { :total_time => run_time_ms, :code => status }

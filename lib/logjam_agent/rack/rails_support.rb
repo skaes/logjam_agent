@@ -16,10 +16,16 @@ module ActionController #:nodoc:
       full_name = "#{controller}##{action}"
       action_name = LogjamAgent.action_name_proc.call(full_name)
 
-      LogjamAgent.request.fields[:action] = action_name
+      request = LogjamAgent.request
+      request.fields[:action] = action_name
 
-      info "Processing by #{full_name} as #{format}"
-      info "  Parameters: #{params.inspect}" unless params.empty?
+      request.log_info.merge!(payload.slice(:action, :controller, :format))
+      request.log_info[:params] = params
+
+      LogjamAgent.logjam_only do
+        info "Processing by #{full_name} as #{format}"
+        info "  Parameters: #{params.inspect}" unless params.empty?
+      end
     end
   end
 

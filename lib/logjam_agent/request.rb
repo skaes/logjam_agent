@@ -6,7 +6,7 @@ end
 
 module LogjamAgent
   class Request
-    attr_reader :fields, :uuid, :start_time
+    attr_reader :fields, :uuid, :start_time, :log_info
     attr_accessor :log_device_ignored_lines
 
     def initialize(app, env, initial_fields)
@@ -39,6 +39,7 @@ module LogjamAgent
       @max_bytes_all_lines = LogjamAgent.max_bytes_all_lines
       @max_line_length = LogjamAgent.max_line_length
       @lines_dropped = false
+      @log_info = {}
     end
 
     def start_time=(start_time)
