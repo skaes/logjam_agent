@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## Version 0.37.0
+* Reduced Rails HTTP Request logging to a single line with JSON content.
+
 ## Version 0.36.0
 * Support suppressing sending data to Logjam and also loggin to the
   log device via an URL regex pattern list
