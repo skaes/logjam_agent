@@ -28,6 +28,9 @@ module LogjamAgent
   mattr_accessor :logger
   self.logger = nil
 
+  mattr_accessor :log_format
+  self.log_format = :text
+
   mattr_accessor :forwarding_error_logger
   self.forwarding_error_logger = nil
 

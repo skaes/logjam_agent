@@ -25,8 +25,12 @@ module LogjamAgent
     end
 
     def render_attributes
-      attrs = attributes.select{|k,v| !k.nil? }
+      attrs = non_nil_attributes
       attrs.empty? ? nil : attrs.map{|k,v| "#{k}=#{v}"}.join(" ")
+    end
+
+    def non_nil_attributes
+      attributes.select{|k,v| !k.nil? }
     end
 
   end

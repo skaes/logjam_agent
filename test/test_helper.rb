@@ -14,3 +14,13 @@ require "logjam_agent/receiver"
 
 # for Sinatra
 ENV['RACK_ENV'] = "test"
+
+class MockLogDev
+  attr_reader :lines
+  def initialize
+    @lines = []
+  end
+  def write(s)
+    @lines << s
+  end
+end

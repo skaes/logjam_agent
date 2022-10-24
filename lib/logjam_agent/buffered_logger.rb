@@ -47,25 +47,16 @@ module LogjamAgent
       progname = nil
       message ||= block.call || '' if block
       request = LogjamAgent.request
-      if message.is_a?(Exception)
-        request.add_exception(message.class.to_s, severity) if request
-        message = format_exception(message)
-      else
-        message = message.to_s
-        if request && severity >= Logger::ERROR && (e = detect_logged_exception(message))
-          request.add_exception(e)
-        end
-      end
-      log_to_log_device = LogjamAgent.log_to_log_device?(severity, message)
-      log_to_log_device = false if request && request.ignored?
-      attributes = formatter.render_attributes
-      message = "[#{attributes}] #{message}" if attributes
+      logjam_message = format_message_for_logjam(message, request, severity)
       time = Time.now
+      request.add_line(severity, time, logjam_message) if request && !SelectiveLogging.logdevice_only?
+      log_to_log_device = LogjamAgent.log_to_log_device?(severity, logjam_message)
+      log_to_log_device = false if request && request.ignored?
       if log_to_log_device && !SelectiveLogging.logjam_only?
-        formatted_message = formatter.call(format_severity(severity), time, progname, message)
+        device_message = format_message_for_log_device(message)
+        formatted_message = formatter.call(format_severity(severity), time, progname, device_message)
         @logdev.write(formatted_message) if @logdev
       end
-      request.add_line(severity, time, message) if request && !SelectiveLogging.logdevice_only?
       message
     end
 
@@ -93,11 +84,61 @@ module LogjamAgent
     def format_exception(exception)
       msg = "#{exception.class}(#{exception.message})"
       if backtrace = exception.backtrace
-        backtrace = Rails.backtrace_cleaner.clean(backtrace, :all) if defined?(Rails)
+        backtrace = Rails.backtrace_cleaner.clean(backtrace, :all) if defined?(Rails) && Rails.respond_to?(:backtrace_cleaner)
         msg << ":\n  #{backtrace.join("\n  ")}"
       else
         msg
       end
+    end
+
+    def format_message_for_log_device(message, format: LogjamAgent.log_format)
+      case message
+      when Exception
+        if format == :json
+          encode_log_message(message: message.message, error: format_exception(message))
+        else
+          prepend_attribute_tags(format_exception(message))
+        end
+      when Hash
+        if format == :json
+          encode_log_message(message)
+        else
+          prepend_attribute_tags(LogjamAgent.json_encode_payload(message))
+        end
+      else
+        if format == :json
+          encode_log_message(message: message.to_s)
+        else
+          prepend_attribute_tags(message)
+        end
+      end
+    end
+
+    def format_message_for_logjam(message, request, severity)
+      case message
+      when Exception
+        request.add_exception(message.class.to_s, severity) if request
+        message = format_exception(message)
+      when Hash
+        message = LogjamAgent.json_encode_payload(message)
+      else
+        if request && severity >= Logger::ERROR && (e = detect_logged_exception(message))
+          request.add_exception(e)
+        end
+      end
+      prepend_attribute_tags(message)
+    end
+
+    def prepend_attribute_tags(message)
+      attributes = formatter.render_attributes
+      message = "[#{attributes}] #{message}" if attributes
+      message
+    end
+
+    def encode_log_message(message_hash)
+      attrs = formatter.non_nil_attributes.to_h
+      msg = attrs.merge(message_hash)
+      LogjamAgent.json_encode_payload(msg)
     end
   end
 end

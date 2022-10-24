@@ -182,6 +182,26 @@ Using one of the logjam helpers `LogjamAgent.logjam_only` or
 `LogjamAgent.logdevice_only` it is possible to send information to
 only one of those log line sinks for the duration of a given block.
 
+## JSON Logging
+
+When `LogjamAgent.log_format` is set to `:json`, the logjam agent
+logger will make sure that the content of line logged to the log
+device is converted to JSON.
+
+```ruby
+Rails.logger.info("foobar is great!")
+# ----->
+{ "message": "foobar is great!"}
+
+Rails.logger.info(message: "foobar", user: 5)
+# ----->
+{ "message": "foobar", "user": 5 }
+
+e = Standard::Error.new()
+Rails.logger.info(e)
+# ----->
+{ "message": "#{e.message}", "error": <execption with formatted backtrace> }
+```
 
 ## Troubleshooting
 

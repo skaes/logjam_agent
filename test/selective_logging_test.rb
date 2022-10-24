@@ -2,16 +2,6 @@ require_relative "test_helper.rb"
 
 module LogjamAgent
   class SelectiveLoggingTest < MiniTest::Test
-    class MockLogDev
-      attr_reader :lines
-      def initialize
-        @lines = []
-      end
-      def write(s)
-        @lines << s
-      end
-    end
-
     def setup
       @request = LogjamAgent.request = Request.new("app", "env", {})
       @lines = @request.instance_variable_get :@lines
