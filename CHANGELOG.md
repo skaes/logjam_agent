@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## Version 0.37.1
+* Changed format of HTTP request completed line to be "Completed: #{data.to_json}"
+
 ## Version 0.37.0
 * Reduced Rails HTTP Request logging to a single line with JSON content.
 
