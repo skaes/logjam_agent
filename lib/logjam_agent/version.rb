@@ -1,3 +1,3 @@
 module LogjamAgent
-  VERSION = "0.37.1"
+  VERSION = "0.38.0"
 end

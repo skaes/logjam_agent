@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## Version 0.38.0
+* Support logging embedded json instead of text. Here embedded means
+  the usual logger prefix is still added to each line.
+
 ## Version 0.37.1
 * Changed format of HTTP request completed line to be "Completed: #{data.to_json}"
 
