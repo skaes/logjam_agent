@@ -162,7 +162,7 @@ module LogjamAgent
             logjam_request.log_info[:status] = status
             logjam_request.log_info[:duration] = run_time_ms
             # logjam_request.log_info[:metrics] = TimeBandits.metrics.reject{|k,v| v.zero?}
-            info "Completed #{http_status} #{logjam_request.log_info.to_json}"
+            info "Completed: #{logjam_request.log_info.to_json}"
           end
         end
 
