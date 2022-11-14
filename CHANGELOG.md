@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 0.38.1
+* Fixed that objects other than strings caused the logger to crash.
+
 ## Version 0.38.0
 * Support logging embedded json instead of text. Here embedded means
   the usual logger prefix is still added to each line.
