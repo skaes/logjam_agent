@@ -122,6 +122,7 @@ module LogjamAgent
       when Hash
         message = LogjamAgent.json_encode_payload(message)
       else
+        message = message.to_s
         if request && severity >= Logger::ERROR && (e = detect_logged_exception(message))
           request.add_exception(e)
         end

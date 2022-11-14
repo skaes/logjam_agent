@@ -100,5 +100,22 @@ module LogjamAgent
       assert_match(/ERROR -- : RuntimeError\(murks\):(\n.*\.rb:\d+:in\s.*)+/, @device.lines.first)
     end
 
+    def test_can_log_arrays_as_text
+      LogjamAgent.log_format = :text
+      @logger.error([1, 2])
+      assert_equal 1, @lines.size
+      assert_equal([1, 2].to_s, @lines.first.last)
+      assert_equal 1, @device.lines.size
+      assert_match(/ERROR -- : \[1, 2\]\n/, @device.lines.first)
+    end
+
+    def test_can_log_arrays_as_json
+      LogjamAgent.log_format = :json
+      @logger.error([1, 2])
+      assert_equal 1, @lines.size
+      assert_equal([1, 2].to_s, @lines.first.last)
+      assert_equal 1, @device.lines.size
+      assert_match(/ERROR -- : \{"message":"\[1, 2\]"\}\n/, @device.lines.first)
+    end
   end
 end
