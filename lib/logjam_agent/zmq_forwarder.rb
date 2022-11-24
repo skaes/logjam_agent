@@ -125,7 +125,7 @@ module LogjamAgent
     end
 
     def log_warning(message)
-      LogjamAgent.error_handler.call ForwardingWarning.new(message)
+      LogjamAgent.error_handler&.call ForwardingWarning.new(message)
     end
 
     VALID_RESPONSE_CODES = [200,202]
