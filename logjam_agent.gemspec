@@ -28,6 +28,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency "sinatra"
   s.add_development_dependency "rack-test"
   s.add_development_dependency "appraisal"
+  s.add_development_dependency "simplecov"
 
   s.add_runtime_dependency "activesupport"
   s.add_runtime_dependency "time_bandits", [">= 0.12.2"]
