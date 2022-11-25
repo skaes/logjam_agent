@@ -58,5 +58,20 @@ module LogjamAgent
       f.forward(data, :routing_key => "x", :app_env => "a-b")
     end
 
+    test "can log forwarding warnings if error_handler is defined" do
+      msg = nil
+      LogjamAgent.expects(:error_handler).returns(->(m){ msg = m})
+      ZMQForwarder.new.__send__(:log_warning, "xxx")
+      assert_instance_of ForwardingWarning, msg
+      assert_equal "xxx", msg.message
+    end
+
+    test "does not log forwading warnings if error_handler is nil" do
+      msg = nil
+      LogjamAgent.expects(:error_handler).returns(nil)
+      ZMQForwarder.new.__send__(:log_warning, "xxx")
+      assert_nil msg
+    end
+
   end
 end
