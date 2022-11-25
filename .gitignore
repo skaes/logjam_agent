@@ -7,3 +7,4 @@ pkg/*
 log/*
 /railsapp/tmp/*
 railsapp/.byebug_history
+/coverage
