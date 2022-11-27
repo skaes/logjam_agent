@@ -1,12 +1,12 @@
-require 'minitest/autorun'
-require 'minitest/unit'
-require 'minitest/pride' if ENV['RAINBOW_COLORED_TESTS'] == "1" && $stdout.tty?
-require 'mocha/minitest'
-
 require 'simplecov'
 SimpleCov.start do
   add_filter %r{^/test/}
 end
+
+require 'minitest/autorun'
+require 'minitest/unit'
+require 'minitest/pride' if ENV['RAINBOW_COLORED_TESTS'] == "1" && $stdout.tty?
+require 'mocha/minitest'
 
 class MiniTest::Test
   require "active_support/testing/declarative"
