@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 0.38.2
+* Fixes that setting the error logger to `nil` would crash.
+
 ## 0.38.1
 * Fixed that objects other than strings caused the logger to crash.
 
