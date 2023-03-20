@@ -216,8 +216,7 @@ module LogjamAgent
       CONTENT_LENGTH = 'CONTENT_LENGTH'
       COOKIE = 'HTTP_COOKIE'
 
-      KV_RE   = '[^&;=]+'
-      PAIR_RE = %r{(#{KV_RE})=(#{KV_RE})}
+      include Obfuscation
 
       def extract_headers(request, filter)
         headers = request.env.reject{|k,v| k =~ HIDDEN_VARIABLES }
@@ -225,15 +224,11 @@ module LogjamAgent
         headers = filter.filter(headers)
 
         if referer = headers[REFERER]
-          headers[REFERER] = referer.gsub(PAIR_RE) do |_|
-            filter.filter($1 => $2).first.join("=")
-          end
+          headers[REFERER] = filter_pairs(referer, filter)
         end
 
-        if (cookie = headers[COOKIE]) && LogjamAgent.obfuscated_cookies.present?
-          headers[COOKIE] = cookie.gsub(PAIR_RE) do |_|
-            LogjamAgent.cookie_obfuscator.filter($1 => $2).first.join("=")
-          end
+        if (cookie = headers[COOKIE]) && obfuscated_cookies.present?
+          headers[COOKIE] = filter_pairs(cookie, cookie_obfuscator)
         end
 
         headers.keys.each do |k|

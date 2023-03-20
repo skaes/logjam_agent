@@ -26,6 +26,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency "minitest"
   s.add_development_dependency "mocha"
   s.add_development_dependency "sinatra"
+  s.add_development_dependency "sinatra-contrib"
   s.add_development_dependency "rack-test"
   s.add_development_dependency "appraisal"
   s.add_development_dependency "simplecov"

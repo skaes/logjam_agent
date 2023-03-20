@@ -24,7 +24,10 @@ module LogjamAgent
     end
 
     def test_root
-      get '/index?mumu=1&password=5'
+      cookie_jar = ::Rack::Test::CookieJar.new
+      cookie_jar['foo'] = 'bar'
+      cookie_jar['baz'] = 'gni'
+      get '/index?mumu=1&password=5', {}, 'HTTP_COOKIE' => cookie_jar.for(nil)
       assert_equal 'Hello World!', last_response.body
       assert_equal 200, last_response.status
 
@@ -49,6 +52,8 @@ module LogjamAgent
       assert_equal method, "GET"
       assert_equal url, "/index?mumu=1&password=[FILTERED]"
       assert_equal(query_parameters, { "mumu" => "1", "password" => "[FILTERED]" })
+      assert_match(/baz=gni/, request_info["headers"]["Cookie"])
+      assert_match(/foo=\[FILTERED\]/, request_info["headers"]["Cookie"])
     end
 
   end
