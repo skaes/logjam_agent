@@ -17,19 +17,6 @@ Gem::Specification.new do |s|
   s.executables   = []
   s.require_paths = ["lib"]
 
-  s.add_development_dependency "rake"
-  s.add_development_dependency "i18n"
-  s.add_development_dependency "snappy"
-  s.add_development_dependency "lz4-ruby"
-  s.add_development_dependency "oj"
-  s.add_development_dependency "byebug"
-  s.add_development_dependency "minitest"
-  s.add_development_dependency "mocha"
-  s.add_development_dependency "sinatra"
-  s.add_development_dependency "rack-test"
-  s.add_development_dependency "appraisal"
-  s.add_development_dependency "simplecov"
-
   s.add_runtime_dependency "activesupport"
   s.add_runtime_dependency "time_bandits", [">= 0.12.2"]
   s.add_runtime_dependency "ffi-rzmq-core", [">= 1.0.5"]
