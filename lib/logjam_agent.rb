@@ -10,6 +10,7 @@ end
 
 require "logjam_agent/version"
 require "logjam_agent/util"
+require "logjam_agent/obfuscation"
 require "logjam_agent/zmq_forwarder"
 require "logjam_agent/forwarders"
 require "logjam_agent/request"
@@ -77,26 +78,7 @@ module LogjamAgent
   mattr_accessor :ensure_ping_at_exit
   self.ensure_ping_at_exit = true
 
-  mattr_accessor :obfuscate_ips
-  self.obfuscate_ips = false
-
-  # TODO: ipv6 obfuscation
-  def self.ip_obfuscator(ip)
-    obfuscate_ips ? ip.to_s.sub(/\d+\z/, 'XXX') : ip
-  end
-
-  mattr_accessor :obfuscated_cookies
-  self.obfuscated_cookies = [/_session\z/]
-
-  def self.cookie_obfuscator
-    @cookie_obfuscator ||=
-      if defined?(ActiveSupport::ParameterFilter)
-        ActiveSupport::ParameterFilter.new(obfuscated_cookies)
-      else
-        ActionDispatch::Http::ParameterFilter.new(obfuscated_cookies)
-      end
-  end
-
+  extend Obfuscation
   extend RequestHandling
   extend SelectiveLogging
 

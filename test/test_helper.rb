@@ -20,6 +20,9 @@ require "logjam_agent/receiver"
 # for Sinatra
 ENV['RACK_ENV'] = "test"
 
+# Obfuscate the foo cookie.
+LogjamAgent.obfuscated_cookies = [/\A(foo|.*_session)\z/]
+
 class MockLogDev
   attr_reader :lines
   def initialize

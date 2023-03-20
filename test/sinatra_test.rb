@@ -52,6 +52,8 @@ module LogjamAgent
       assert_equal method, "GET"
       assert_equal url, "/index?mumu=1&password=[FILTERED]"
       assert_equal(query_parameters, { "mumu" => "1", "password" => "[FILTERED]" })
+      assert_match(/baz=gni/, request_info["headers"]["Cookie"])
+      assert_match(/foo=\[FILTERED\]/, request_info["headers"]["Cookie"])
     end
 
   end
