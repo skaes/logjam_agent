@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 0.38.3
+* Fixes that filtering cookies did not handle regular expressions
+  anchored at the beginning of a string correctly.
+
 ## 0.38.2
 * Fixes that setting the error logger to `nil` would crash.
 
