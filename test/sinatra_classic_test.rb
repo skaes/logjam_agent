@@ -12,7 +12,10 @@ module LogjamAgent
     end
 
     def test_root
-      get '/index?mumu=1&password=5'
+      cookie_jar = ::Rack::Test::CookieJar.new
+      cookie_jar['foo'] = 'bar'
+      cookie_jar['baz'] = 'gni'
+      get '/index?mumu=1&password=5', {}, 'HTTP_COOKIE' => cookie_jar.for(nil)
       assert_equal 'Hello World!', last_response.body
     end
 

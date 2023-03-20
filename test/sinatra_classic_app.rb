@@ -1,6 +1,7 @@
 $:.unshift File.expand_path('../../lib', __FILE__)
 
 require 'logjam_agent/sinatra'
+require 'sinatra/cookies'
 
 use LogjamAgent::Sinatra::Middleware
 
@@ -27,5 +28,7 @@ end
 get '/index' do
   action_name "Simple#index"
   logger.info 'Hello World!'
+  cookies[:foo] = 'bar'
+  cookies[:frerks] = "no micro"
   'Hello World!'
 end
