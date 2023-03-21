@@ -23,5 +23,12 @@ module LogjamAgent
       assert_equal "_session=[FILTERED]; my_login=foo",  obfuscate_cookie("_session=my_session; my_login=foo", filter)
       assert_equal "my_session=[FILTERED]; my_login=foo",  obfuscate_cookie("my_session=my_session; my_login=foo", filter)
     end
+
+    test "handles equal signs in values" do
+      filter = ParameterFilter.new([/foo/])
+      assert_equal "foo=[FILTERED]", filter_pairs("foo=abc=dce", filter)
+      assert_equal "foo=[FILTERED]; ", filter_pairs("foo=abc=dce; ", filter)
+      assert_equal "foo=[FILTERED]; bar=baz", filter_pairs("foo=abc=dce; bar=baz", filter)
+    end
   end
 end
