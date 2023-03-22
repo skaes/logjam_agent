@@ -1,5 +1,8 @@
 # CHANGELOG
 
+### 0.38.4
+* Expose interface for cookie obfuscation.
+
 ## 0.38.3
 * Fixes that filtering cookies did not handle regular expressions
   anchored at the beginning of a string correctly.
