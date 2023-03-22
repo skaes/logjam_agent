@@ -228,7 +228,7 @@ module LogjamAgent
         end
 
         if (cookie = headers[COOKIE]) && obfuscated_cookies.present?
-          headers[COOKIE] = filter_pairs(cookie, cookie_obfuscator)
+          headers[COOKIE] = obfuscate_cookie(cookie, cookie_obfuscator)
         end
 
         headers.keys.each do |k|

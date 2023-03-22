@@ -16,6 +16,10 @@ module LogjamAgent
       @cookie_obfuscator ||= ParameterFilter.new(obfuscated_cookies)
     end
 
+    def obfuscate_cookie(cookie, filter = cookie_obfuscator)
+      filter_pairs(cookie, filter)
+    end
+
     begin
       # rails 6.1 and higher
       require "active_support/parameter_filter"
