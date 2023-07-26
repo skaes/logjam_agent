@@ -167,6 +167,9 @@ module LogjamAgent
     true
   end
 
+  mattr_accessor :exception_auto_detection_level
+  self.exception_auto_detection_level = Logger::ERROR
+
   def self.auto_detect_exception(exception_class)
     # ignore Exception classes created with Class.new (timeout.rb, my old friend)
     if (class_name = exception_class.to_s) =~ /^[\w:]+$/
