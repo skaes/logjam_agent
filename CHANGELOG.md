@@ -1,5 +1,9 @@
 # CHANGELOG
 
+### 0.38.5
+* Make level at which exceptions are auto detected configurable. Defaults to
+  `Logger::ERROR`.
+
 ### 0.38.4
 * Expose interface for cookie obfuscation.
 
