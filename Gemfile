@@ -23,6 +23,4 @@ gem "sinatra", require: false
 gem "sinatra-contrib", require: false
 gem "rack-test"
 gem "simplecov"
-
-# Use patched appraisal gem until it is fixed upstream.
-gem "appraisal", git: "https://github.com/thoughtbot/appraisal.git", ref: "0c855ae0da89fec74b4d1a01801c55b0e72496d4"
+gem "appraisal"
