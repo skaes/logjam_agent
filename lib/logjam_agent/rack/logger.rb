@@ -12,6 +12,7 @@ module LogjamAgent
         @asset_prefix = Rails.application.config.assets.prefix rescue "---"
         @ignore_asset_requests = LogjamAgent.ignore_asset_requests
         @ignored_request_urls = LogjamAgent.ignored_request_urls
+        @use_to_default_s = Gem::Version.new(Rails::VERSION::STRING) < Gem::Version.new("7.1.0")
       end
 
       def call(env)
@@ -123,7 +124,8 @@ module LogjamAgent
         logjam_fields.merge!(extract_request_info(request))
 
         LogjamAgent.logjam_only do
-          info "Started #{request.request_method} \"#{path}\" for #{ip} at #{start_time.to_default_s}" unless logjam_request.ignored?(:asset)
+          started_at_str = @use_to_default_s ? start_time.to_default_s : start_time.to_s
+          info "Started #{request.request_method} \"#{path}\" for #{ip} at #{started_at_str}" unless logjam_request.ignored?(:asset)
         end
         if spoofed
           error spoofed
