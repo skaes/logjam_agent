@@ -1,6 +1,7 @@
 require 'fileutils'
 
 require 'active_support/logger'
+require 'rails/version'
 
 class LogjamAgent::ConsoleFormatter < Logger::Formatter
   # This method is invoked when a log event occurs
@@ -13,13 +14,16 @@ class LogjamAgent::ConsoleFormatter < Logger::Formatter
   end
 end
 
-class ActiveSupport::Logger
-  class << self
-    alias_method :original_broadcast, :broadcast
-    def broadcast(logger)
-      logger.formatter = LogjamAgent::ConsoleFormatter.new
-      logger.formatter.extend(ActiveSupport::TaggedLogging::Formatter)
-      original_broadcast(logger)
+if Gem::Version.new(Rails::VERSION::STRING) < Gem::Version.new("7.1.0")
+
+  class ActiveSupport::Logger
+    class << self
+      alias_method :original_broadcast, :broadcast
+      def broadcast(logger)
+        logger.formatter = LogjamAgent::ConsoleFormatter.new
+        logger.formatter.extend(ActiveSupport::TaggedLogging::Formatter)
+        original_broadcast(logger)
+      end
     end
   end
 end

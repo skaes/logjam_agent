@@ -33,6 +33,19 @@ module LogjamAgent
           )
           LogjamAgent.logger = logger
         end
+
+      if Gem::Version.new(Rails::VERSION::STRING) >= Gem::Version.new("7.1.0")
+        unless Rails.logger.is_a?(ActiveSupport::BroadcastLogger)
+          broadcast_logger = ActiveSupport::BroadcastLogger.new(Rails.logger)
+          broadcast_logger.formatter = Rails.logger.formatter
+          Rails.logger = broadcast_logger
+          LogjamAgent.logger = logger
+        end
+
+        unless app.config.consider_all_requests_local
+          Rails.error.logger = Rails.logger
+        end
+      end
     end
 
     initializer "logjam_agent", :after => "time_bandits" do |app|
