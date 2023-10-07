@@ -12,7 +12,7 @@ module LogjamAgent
         @asset_prefix = Rails.application.config.assets.prefix rescue "---"
         @ignore_asset_requests = LogjamAgent.ignore_asset_requests
         @ignored_request_urls = LogjamAgent.ignored_request_urls
-        @use_to_default_s = Gem::Version.new(Rails::VERSION::STRING) < Gem::Version.new("7.1.0")
+        @use_to_default_s = Gem::Version.new(ActiveSupport::VERSION::STRING) < Gem::Version.new("7.1.0")
       end
 
       def call(env)
