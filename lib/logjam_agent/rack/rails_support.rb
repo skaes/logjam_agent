@@ -10,6 +10,7 @@ module ActionController #:nodoc:
       params  = payload[:params].except(*INTERNAL_PARAMS)
       format  = payload[:format]
       format  = format.to_s.upcase if format.is_a?(Symbol)
+      format  = "*/*" if format.nil?
 
       controller = payload[:controller]
       action = payload[:action]
