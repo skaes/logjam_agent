@@ -1,5 +1,9 @@
 # CHANGELOG
 
+### 0.39.0
+
+* Support Rails 7.1.
+
 ### 0.38.5
 * Make level at which exceptions are auto detected configurable. Defaults to
   `Logger::ERROR`.
