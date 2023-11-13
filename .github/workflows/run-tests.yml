@@ -21,6 +21,8 @@ jobs:
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: ${{ matrix.ruby-version }}
+      - name: apt-get update
+        run: sudo apt-get update
       - name: Install dependencies
         run: sudo apt-get install libzmq3-dev
       - name: Install gems
