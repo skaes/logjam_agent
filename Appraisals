@@ -5,6 +5,7 @@ appraisals << "6.1.7.6"
 appraisals << "7.0.8" if Gem::Version.new(RUBY_VERSION) >= Gem::Version.new("2.7.0")
 appraisals << "7.1.0"
 appraisals << "7.1.1"
+appraisals << "7.1.2"
 
 appraisals.each do |rails_version|
   appraise "rails-#{rails_version}" do
