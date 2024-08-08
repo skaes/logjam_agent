@@ -24,3 +24,4 @@ gem "sinatra-contrib", require: false
 gem "rack-test"
 gem "simplecov"
 gem "appraisal"
+gem "drb"
