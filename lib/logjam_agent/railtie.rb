@@ -140,7 +140,7 @@ module LogjamAgent
             trace = wrapper.application_trace
             trace = wrapper.framework_trace if trace.empty?
 
-            if Rails::VERSION::STRING >= "7.1" do
+            if Gem::Version.new(Rails::VERSION::STRING) >= Gem::Version.new("7.1.0")
               Rails.application.deprecators.silence do
                 parts = [ "#{exception.class} (#{exception.message})" ]
                 parts.concat exception.annoted_source_code if exception.respond_to?(:annoted_source_code)
@@ -154,7 +154,7 @@ module LogjamAgent
                 parts.concat trace
                 logger.fatal parts.join("\n  ")
               end
-  
+
             end
           end
         end
