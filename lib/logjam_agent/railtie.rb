@@ -140,11 +140,21 @@ module LogjamAgent
             trace = wrapper.application_trace
             trace = wrapper.framework_trace if trace.empty?
 
-            ActiveSupport::Deprecation.silence do
-              parts = [ "#{exception.class} (#{exception.message})" ]
-              parts.concat exception.annoted_source_code if exception.respond_to?(:annoted_source_code)
-              parts.concat trace
-              logger.fatal parts.join("\n  ")
+            if Rails::VERSION::STRING >= "7.1" do
+              Rails.application.deprecators.silence do
+                parts = [ "#{exception.class} (#{exception.message})" ]
+                parts.concat exception.annoted_source_code if exception.respond_to?(:annoted_source_code)
+                parts.concat trace
+                logger.fatal parts.join("\n  ")
+              end
+            else
+              ActiveSupport::Deprecation.silence do
+                parts = [ "#{exception.class} (#{exception.message})" ]
+                parts.concat exception.annoted_source_code if exception.respond_to?(:annoted_source_code)
+                parts.concat trace
+                logger.fatal parts.join("\n  ")
+              end
+  
             end
           end
         end
