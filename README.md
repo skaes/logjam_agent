@@ -120,6 +120,19 @@ module LogjamAgent
 end
 ```
 
+### Logger setup
+
+The gem ships with a railtie that sets up a logjam agent specific logger which serves the
+dual purpose of collecting log lines to be published on the logjam logging bus once the
+request is complete and sending them to the log device as they are produced.
+
+The logger setup code in the Rails environment specific initialization files should be
+removed. Setup code which can remain without affecting logjam functionality is setting the
+log level or changing the log formatter. It is advisable to read the logger initialization
+code contained in file `lib/logjam_agent/railtie.rb` to understand what's going on behind
+the scenes.
+
+
 ### Generating unique request ids
 
 The agent generates unique request ids for all request handled using standard
