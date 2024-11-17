@@ -15,6 +15,11 @@ end
 appraisals.each do |rails_version|
   appraise "rails-#{rails_version}" do
     gem "rails", rails_version
+    if rails_version < "8.0.0"
+      gem "sqlite3", "~> 1.7"
+    else
+      gem "sqlite3", "~> 2.1"
+    end
     gem "sprockets"
     gem "sass-rails"
     gem "uglifier"

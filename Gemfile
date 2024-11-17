@@ -6,7 +6,7 @@ source "https://rubygems.org"
 gemspec
 
 gem "rails"
-gem "sqlite3", "~> 1.7"
+gem "sqlite3"
 gem "sprockets"
 gem "sass-rails"
 gem "uglifier"
