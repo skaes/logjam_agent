@@ -1,15 +1,15 @@
 appraisals = []
 appraisals << "6.0.6.1" if Gem::Version.new(RUBY_VERSION) < Gem::Version.new("3.1.0")
 appraisals << "6.1.7.10"
-appraisals << "7.0.8.6"
-appraisals << "7.1.5"
+appraisals << "7.0.8.7"
+appraisals << "7.1.5.1"
 
 if Gem::Version.new(RUBY_VERSION) > Gem::Version.new("3.1.0")
-  appraisals << "7.2.2"
+  appraisals << "7.2.2.1"
 end
 
 if Gem::Version.new(RUBY_VERSION) > Gem::Version.new("3.2.0")
-  appraisals << "8.0.0"
+  appraisals << "8.0.0.1"
 end
 
 appraisals.each do |rails_version|
