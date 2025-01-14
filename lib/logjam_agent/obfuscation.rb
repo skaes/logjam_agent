@@ -31,7 +31,7 @@ module LogjamAgent
     end
 
     KEY_RE = '[^&;=\s]+'
-    VAL_RE = '[^&;=]+'
+    VAL_RE = '[^; ]+'
     PAIR_RE = %r{(#{KEY_RE})=(#{VAL_RE})}
 
     def filter_pairs(str, filter)
