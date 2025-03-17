@@ -9,7 +9,7 @@ if Gem::Version.new(RUBY_VERSION) > Gem::Version.new("3.1.0")
 end
 
 if Gem::Version.new(RUBY_VERSION) > Gem::Version.new("3.2.0")
-  appraisals << "8.0.0.1"
+  appraisals << "8.0.2"
 end
 
 appraisals.each do |rails_version|
