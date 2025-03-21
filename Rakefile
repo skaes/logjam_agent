@@ -14,6 +14,7 @@ task :default do
   Rake::Task[:test].invoke
 end
 
+desc "Run integration tests"
 task :integration do
   sh "cd railsapp && rake"
 end
